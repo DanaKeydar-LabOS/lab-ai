@@ -1,0 +1,81 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+
+# Poetry virtualenv
+# If you use `.venv/` locally, ignore it
+.venv/
+
+# If you configure Poetry to create virtualenvs elsewhere, ignore that path instead
+# Example:
+# ~/.cache/pypoetry/virtualenvs/
+# (not needed unless you're committing home-dir configs)
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+*.eggs/
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# PyCharm
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+
+# Test output / coverage
+htmlcov/
+.coverage
+.tox/
+.nox/
+.cache/
+.pytest_cache/
+.mypy_cache/
+coverage.xml
+*.cover
+*.log
+
+# Environments / dotenv
+.env
+.env.*
+
+# SQLite / local DBs
+*.sqlite3
+*.db
+
+# Compiled C/C++ (optional, if you compile extensions)
+*.so
+*.dll
+*.dylib
+*.out
+*.o
+*.a
+
+# Mac / Windows / Linux system files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+*.swp
+*~
+
+# Logs and misc
+logs/
+*.log
+nohup.out
+
+# Jupyter (if used)
+.ipynb_checkpoints
+
+# Profiling/debugging
+*.prof
+*.lprof
+*.pstats

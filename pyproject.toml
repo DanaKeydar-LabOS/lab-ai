@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "lab-ai"
+version = "0.1.0"
+description = ""
+authors = ["Vadim Lakhterman <vadim.l@labos.co>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.115.14"
+uvicorn = "^0.35.0"
+mypy = "^1.16.1"
+pytest = "^8.4.1"
+httpx = "^0.28.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
