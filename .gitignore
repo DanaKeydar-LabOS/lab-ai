@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.manifest
+*.spec
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv/
+
+# PyCharm
+.idea/
+*.iml
+
+# Logs and databases
+*.log
+*.sqlite3
+*.db
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# Coverage / testing
+htmlcov/
+.tox/
+.coverage
+coverage.xml
+.pytest_cache/
+.mypy_cache/
+
+# C extensions
+*.dll
+*.o
+*.a
+*.out
+
+# VS Code (if you ever open with it)
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
