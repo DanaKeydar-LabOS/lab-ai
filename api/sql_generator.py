@@ -4,6 +4,9 @@ from typing import List, Dict, Any, Optional
 import ollama
 from config import settings
 from models import QueryValidation, SQLGenerationResult
+import re
+from datetime import datetime, timedelta
+from typing import List, Dict, Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -144,7 +147,6 @@ class SQLGenerator:
     2. Dates are integers, not strings: aodate = 20250821 (not '20250821')
     3. Use (NOLOCK) hints: FROM ao(NOLOCK)
     4. NO parameters or placeholders like {{date}} - use actual values
-    5. Field names: aodate, aoordno, aopatcode for ao table
     
     Available tables: {table_names}
     Today's date: {current_date_str}
