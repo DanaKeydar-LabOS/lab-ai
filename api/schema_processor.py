@@ -18,7 +18,7 @@ class SchemaProcessor:
     async def ingest_schema(self, vector_store, sql_generator) -> SchemaIngestionStatus:
         """Ingest database schema into vector store"""
         try:
-            logger.info("Starting enhanced schema ingestion with query examples...")
+            logger.info("Starting schema ingestion...")
 
             # Reset vector store collection
             await vector_store.create_collection()
@@ -49,13 +49,13 @@ class SchemaProcessor:
                     # Get catalog info
                     catalog_info = catalog_data.get(table_name, {})
 
-                    # Process schema into searchable text (now includes examples)
-                    schema_text = self._process_table_schema_with_examples(table_data, table_name, catalog_info)
+                    # Process schema into searchable text
+                    schema_text = self._process_table_schema(table_data, table_name, catalog_info)
 
                     # Generate embedding
                     embedding = await sql_generator.get_embedding(schema_text)
 
-                    # Prepare point for batch insert
+                    # Prepare point for batch insert (don't include 'id' here, let vector_store generate it)
                     schema_point = {
                         'embedding': embedding,
                         'payload': {
@@ -63,209 +63,36 @@ class SchemaProcessor:
                             'schema_text': schema_text,
                             'table_data': table_data,
                             'catalog_info': catalog_info,
-                            'query_examples_count': len(table_data.get('examples', [])),
-                            'has_query_examples': len(table_data.get('examples', [])) > 0,
                             'ingestion_time': datetime.now().isoformat()
                         }
                     }
                     schema_points.append(schema_point)
                     processed_tables += 1
-
-                    # Log query examples found
-                    examples_count = len(table_data.get('examples', []))
-                    if examples_count > 0:
-                        logger.info(f"  ✅ Found {examples_count} query examples for {table_name}")
-                    else:
-                        logger.warning(f"  ⚠️  No query examples found for {table_name}")
                 else:
                     logger.warning(f"Table file not found: {table_file}")
 
             # Batch insert all schemas
             if schema_points:
                 await vector_store.store_multiple_schemas(schema_points)
-                logger.info(f"Successfully ingested {processed_tables} tables with enhanced query examples")
+                logger.info(f"Successfully ingested {processed_tables} tables")
 
             return SchemaIngestionStatus(
                 status="success",
-                message=f"Enhanced schema with query examples ingested successfully",
+                message=f"Schema ingested successfully",
                 processed_tables=processed_tables,
                 catalog_loaded=len(catalog_data) > 0,
                 ingestion_time=datetime.now().isoformat()
             )
 
         except Exception as e:
-            logger.error(f"Error during enhanced schema ingestion: {e}")
+            logger.error(f"Error during schema ingestion: {e}")
             return SchemaIngestionStatus(
                 status="error",
-                message=f"Enhanced schema ingestion failed: {str(e)}",
+                message=f"Schema ingestion failed: {str(e)}",
                 processed_tables=0,
                 catalog_loaded=False,
                 ingestion_time=datetime.now().isoformat()
             )
-
-    def _process_table_schema_with_examples(self, table_data: Dict[str, Any], table_name: str,
-                                            catalog_info: Dict[str, Any]) -> str:
-        """Process table schema into searchable text including query examples"""
-        schema_text = f"Table: {table_name}\n"
-
-        # Handle your specific data format
-        if 'display_name' in table_data:
-            schema_text += f"Display Name: {table_data['display_name']}\n"
-
-        if 'alias' in table_data:
-            schema_text += f"Alias: {table_data['alias']}\n"
-
-        # Add table description
-        if 'description' in table_data:
-            schema_text += f"Description: {table_data['description']}\n"
-
-        # Add catalog description if different
-        if 'description' in catalog_info and catalog_info['description'] != table_data.get('description'):
-            schema_text += f"Additional Info: {catalog_info['description']}\n"
-
-        # Process fields
-        if 'fields' in table_data:
-            schema_text += "\nFields/Columns:\n"
-            for field_name, field_description in table_data['fields'].items():
-                schema_text += f"- {field_name}: {field_description}\n"
-
-        # Process joins (relationships)
-        if 'joins' in table_data:
-            schema_text += "\nTable Relationships/Joins:\n"
-            for join_table, join_conditions in table_data['joins'].items():
-                if isinstance(join_conditions, list):
-                    for condition in join_conditions:
-                        schema_text += f"- JOIN {join_table}: {condition}\n"
-                else:
-                    schema_text += f"- JOIN {join_table}: {join_conditions}\n"
-
-        # Process indexes
-        if 'Indexes' in table_data:
-            schema_text += "\nDatabase Indexes:\n"
-            for index_name, index_description in table_data['Indexes'].items():
-                schema_text += f"- {index_name}: {index_description}\n"
-
-        # *** NEW: Process Query Examples ***
-        if 'examples' in table_data and table_data['examples']:
-            schema_text += "\nSQL Query Examples and Patterns:\n"
-            schema_text += "=" * 40 + "\n"
-
-            for i, example in enumerate(table_data['examples'], 1):
-                query = example.get('query', '')
-                description = example.get('description', '')
-                parameters = example.get('parameters', {})
-
-                schema_text += f"\nExample {i}: {description}\n"
-                schema_text += f"SQL Pattern:\n{query}\n"
-
-                if parameters:
-                    schema_text += "Parameters:\n"
-                    for param_name, param_desc in parameters.items():
-                        schema_text += f"  - {param_name}: {param_desc}\n"
-
-                # Extract SQL patterns for better understanding
-                sql_patterns = self._extract_sql_patterns(query)
-                if sql_patterns:
-                    schema_text += f"SQL Techniques Used: {', '.join(sql_patterns)}\n"
-
-                schema_text += "-" * 30 + "\n"
-
-        # Add business context from catalog
-        business_context = self._process_business_context(catalog_info)
-        if business_context:
-            schema_text += f"\nBusiness Context:\n{business_context}\n"
-
-        # Add metadata
-        metadata = self._process_metadata(catalog_info)
-        if metadata:
-            schema_text += f"\nMetadata:\n{metadata}\n"
-
-        # Add usage summary based on examples
-        if 'examples' in table_data and table_data['examples']:
-            usage_summary = self._generate_usage_summary(table_data['examples'])
-            schema_text += f"\nCommon Usage Patterns:\n{usage_summary}\n"
-
-        return schema_text
-
-    def _extract_sql_patterns(self, query: str) -> List[str]:
-        """Extract SQL patterns and techniques from example queries"""
-        patterns = []
-        query_upper = query.upper()
-
-        # Check for SQL techniques
-        if 'JOIN' in query_upper:
-            patterns.append('JOINS')
-        if 'NOLOCK' in query_upper:
-            patterns.append('NOLOCK_HINTS')
-        if 'ORDER BY' in query_upper:
-            patterns.append('SORTING')
-        if 'BETWEEN' in query_upper:
-            patterns.append('DATE_RANGES')
-        if 'AND' in query_upper and 'OR' in query_upper:
-            patterns.append('COMPLEX_CONDITIONS')
-        if any(op in query_upper for op in ['=', '<>', '>', '<', '>=', '<=']):
-            patterns.append('FILTERING')
-        if 'GROUP BY' in query_upper:
-            patterns.append('AGGREGATION')
-        if any(func in query_upper for func in ['COUNT', 'SUM', 'AVG', 'MAX', 'MIN']):
-            patterns.append('FUNCTIONS')
-
-        return patterns
-
-    def _generate_usage_summary(self, examples: List[Dict[str, Any]]) -> str:
-        """Generate a summary of common usage patterns from examples"""
-        summary = []
-
-        # Analyze common patterns
-        join_tables = set()
-        common_filters = set()
-        date_patterns = []
-
-        for example in examples:
-            query = example.get('query', '').upper()
-            description = example.get('description', '')
-
-            # Extract joined tables
-            if 'JOIN' in query:
-                # Simple extraction - could be more sophisticated
-                words = query.split()
-                for i, word in enumerate(words):
-                    if word == 'JOIN' and i + 1 < len(words):
-                        table = words[i + 1].replace('(NOLOCK)', '').strip()
-                        join_tables.add(table)
-
-            # Extract common filter patterns
-            if 'ARDATE' in query:
-                common_filters.add('date_filtering')
-            if 'ARTEST' in query:
-                common_filters.add('test_code_filtering')
-            if 'ARORDNO' in query:
-                common_filters.add('order_number_filtering')
-            if 'ARRESSTAT' in query:
-                common_filters.add('result_status_filtering')
-
-            # Note usage patterns
-            if 'patient' in description.lower():
-                summary.append("- Patient-specific queries")
-            if 'date' in description.lower():
-                summary.append("- Date-based filtering")
-            if 'test' in description.lower():
-                summary.append("- Test result retrieval")
-
-        if join_tables:
-            summary.append(f"- Commonly joined with: {', '.join(join_tables)}")
-
-        if common_filters:
-            filter_desc = {
-                'date_filtering': 'Date-based queries',
-                'test_code_filtering': 'Test code filtering',
-                'order_number_filtering': 'Order-based queries',
-                'result_status_filtering': 'Result status filtering'
-            }
-            filters = [filter_desc.get(f, f) for f in common_filters]
-            summary.append(f"- Common filters: {', '.join(filters)}")
-
-        return '\n'.join(summary) if summary else "- General data retrieval queries"
 
     async def _load_catalog_index(self) -> Dict[str, Any]:
         """Load the catalog index file"""
@@ -305,6 +132,67 @@ class SchemaProcessor:
             logger.error(f"Error loading table file {table_file}: {e}")
             return {}
 
+    def _process_table_schema(self, table_data: Dict[str, Any], table_name: str,
+                              catalog_info: Dict[str, Any]) -> str:
+        """Process table schema into searchable text for your data format"""
+        schema_text = f"Table: {table_name}\n"
+
+        # Handle your specific data format
+        # Add display name and alias
+        if 'display_name' in table_data:
+            schema_text += f"Display Name: {table_data['display_name']}\n"
+
+        if 'alias' in table_data:
+            schema_text += f"Alias: {table_data['alias']}\n"
+
+        # Add table description
+        if 'description' in table_data:
+            schema_text += f"Description: {table_data['description']}\n"
+
+        # Add catalog description if different
+        if 'description' in catalog_info and catalog_info['description'] != table_data.get('description'):
+            schema_text += f"Additional Info: {catalog_info['description']}\n"
+
+        # Process fields (your format uses 'fields' instead of 'columns')
+        if 'fields' in table_data:
+            schema_text += "\nFields:\n"
+            for field_name, field_description in table_data['fields'].items():
+                schema_text += f"- {field_name}: {field_description}\n"
+
+        # Process joins (relationships)
+        if 'joins' in table_data:
+            schema_text += "\nJoins/Relationships:\n"
+            for join_table, join_conditions in table_data['joins'].items():
+                if isinstance(join_conditions, list):
+                    for condition in join_conditions:
+                        schema_text += f"- {join_table}: {condition}\n"
+                else:
+                    schema_text += f"- {join_table}: {join_conditions}\n"
+
+        # Process indexes if available
+        if 'Indexes' in table_data:
+            schema_text += "\nIndexes:\n"
+            for index_name, index_description in table_data['Indexes'].items():
+                schema_text += f"- {index_name}: {index_description}\n"
+
+        # Add examples if available
+        if 'examples' in table_data and table_data['examples']:
+            schema_text += "\nExamples:\n"
+            for i, example in enumerate(table_data['examples'][:3]):  # Limit to 3 examples
+                schema_text += f"Example {i + 1}: {example}\n"
+
+        # Add business context from catalog
+        business_context = self._process_business_context(catalog_info)
+        if business_context:
+            schema_text += f"\nBusiness Context:\n{business_context}\n"
+
+        # Add metadata
+        metadata = self._process_metadata(catalog_info)
+        if metadata:
+            schema_text += f"\nMetadata:\n{metadata}\n"
+
+        return schema_text
+
     def _process_business_context(self, catalog_info: Dict[str, Any]) -> str:
         """Process business context information"""
         context_text = ""
@@ -337,7 +225,6 @@ class SchemaProcessor:
             'valid_tables': [],
             'missing_tables': [],
             'invalid_tables': [],
-            'tables_with_examples': [],
             'total_poc_tables': len(self.poc_tables)
         }
 
@@ -351,13 +238,6 @@ class SchemaProcessor:
                     table_data = self._load_table_file(table_file)
                     if table_data:
                         validation_result['valid_tables'].append(table_name)
-
-                        # Check for query examples
-                        if 'examples' in table_data and table_data['examples']:
-                            validation_result['tables_with_examples'].append({
-                                'table': table_name,
-                                'example_count': len(table_data['examples'])
-                            })
                     else:
                         validation_result['invalid_tables'].append(table_name)
                 except Exception as e:
@@ -367,7 +247,7 @@ class SchemaProcessor:
         return validation_result
 
     def get_table_summary(self, table_name: str) -> Dict[str, Any]:
-        """Get a summary of a specific table including query examples"""
+        """Get a summary of a specific table"""
         table_file = self.kb_path / f"{table_name}.json"
 
         if not table_file.exists():
@@ -384,23 +264,10 @@ class SchemaProcessor:
                 "field_count": len(table_data.get('fields', {})),
                 "has_joins": "joins" in table_data and len(table_data['joins']) > 0,
                 "has_indexes": "Indexes" in table_data and len(table_data['Indexes']) > 0,
-                "query_examples_count": len(table_data.get('examples', [])),
-                "has_query_examples": len(table_data.get('examples', [])) > 0,
+                "has_examples": "examples" in table_data and len(table_data['examples']) > 0,
                 "display_name": table_data.get('display_name', ''),
                 "alias": table_data.get('alias', '')
             }
-
-            # Query examples summary
-            if 'examples' in table_data and table_data['examples']:
-                example_descriptions = [ex.get('description', 'No description') for ex in table_data['examples']]
-                summary['example_descriptions'] = example_descriptions
-                summary['sql_patterns_used'] = []
-
-                for example in table_data['examples']:
-                    patterns = self._extract_sql_patterns(example.get('query', ''))
-                    summary['sql_patterns_used'].extend(patterns)
-
-                summary['sql_patterns_used'] = list(set(summary['sql_patterns_used']))
 
             # Field types summary (extract from field descriptions)
             if 'fields' in table_data:

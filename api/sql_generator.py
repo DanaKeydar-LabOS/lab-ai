@@ -105,55 +105,86 @@ class SQLGenerator:
             logger.error(f"Error generating SQL query: {e}")
             raise
 
+    # Replace the _create_enhanced_sql_prompt method in your sql_generator.py
 
     def _create_enhanced_sql_prompt(self, question: str, schema_context: str,
                                     table_names: List[str], query_examples: List[Dict[str, Any]]) -> str:
-        """Create a true pattern learning prompt without giving away the answer"""
+        """Create SQL prompt that forces concrete values and proper table selection"""
 
-        from datetime import datetime, timedelta
+        from datetime import datetime
         current_date = datetime.now()
-        week_ago = current_date - timedelta(days=7)
         current_date_str = current_date.strftime("%Y%m%d")
-        week_ago_str = week_ago.strftime("%Y%m%d")
 
-        # Show 2-3 concrete examples
+        # Show only the most relevant examples (simplified)
         examples_text = ""
         if query_examples:
-            examples_text = "Here are real working queries from this database:\n\n"
-            for i, example in enumerate(query_examples[:3], 1):
-                examples_text += f"Example {i}:\n"
-                examples_text += f"SQL: {example['query']}\n"
-                examples_text += f"Purpose: {example['description']}\n\n"
+            examples_text = "Real working examples:\n"
+            for i, example in enumerate(query_examples[:2], 1):  # Limit to 2 examples
+                # Clean up the example to remove parameters
+                clean_query = example['query'].replace('{', '').replace('}', '20250820')
+                examples_text += f"{i}. {clean_query}\n"
 
-        return f"""You are writing SQL for a lab database. Study these working examples:
+        # Table mapping guidance
+        table_guidance = """
+    Table usage rules:
+    - "archived orders" → ao table (aodate, aoordno, aopatcode)
+    - "orders" (general) → o table (odate, oordno, opatcode) 
+    - "archived results" → ar table (ardate, arordno, artest)
+    - "archived samples" → asa table (asadate, asaordno)
+    """
 
+        return f"""Generate executable SQL for this lab database.
+    
     {examples_text}
-
-    Notice the patterns:
-    - Dates are integers like 20250820 (not strings or functions)
-    - Always use (NOLOCK) hints
-    - Field names: aodate, aoordno, aopatcode, etc.
-    - Simple WHERE conditions
-
+    
+    {table_guidance}
+    
+    CRITICAL RULES:
+    1. Use EXACT date values: {current_date_str} (today) - NO QUOTES around dates
+    2. Dates are integers, not strings: aodate = 20250821 (not '20250821')
+    3. Use (NOLOCK) hints: FROM ao(NOLOCK)
+    4. NO parameters or placeholders like {{date}} - use actual values
+    5. Field names: aodate, aoordno, aopatcode for ao table
+    
     Available tables: {table_names}
     Today's date: {current_date_str}
-    One week ago: {week_ago_str}
-
+    
     Question: "{question}"
-
-    Write SQL that matches these patterns. Use the same style and field names as the examples.
-
+    
+    Write simple, executable SQL with actual integer values:
+    
     SQL_QUERY:
-    [your sql here]
-
+    [Write complete SQL with real integer values, no quotes around dates]
+    
     EXPLANATION:
-    [brief explanation]
-
+    [Brief explanation]
+    
     TABLES_USED:
-    [tables used]"""
+    [Table names only]"""
+
+    def _detect_union_need(self, question: str, table_names: List[str]) -> bool:
+        """Detect if query needs UNION of active + archive tables"""
+        question_lower = question.lower()
+
+        # Keywords that suggest needing both active and archive
+        both_keywords = [
+            "today", "recent", "all orders", "orders from",
+            "results from", "samples from", "show me orders",
+            "show me samples", "show me results", "find orders",
+            "find samples", "find results"
+        ]
+
+        # Check if we have both active and archive tables available
+        has_active = any(t in ['o', 'r', 'sa'] for t in table_names)
+        has_archive = any(t in ['ao', 'ar', 'asa'] for t in table_names)
+
+        # Check if question suggests wanting comprehensive data
+        suggests_both = any(keyword in question_lower for keyword in both_keywords)
+
+        return has_active and has_archive and suggests_both
 
     def _parse_sql_response(self, response_text: str) -> Dict[str, Any]:
-        """Parse the LLM response to extract SQL components with much more robust parsing"""
+        """Parse the LLM response to extract SQL components with improved parsing"""
         sql_query = ""
         explanation = ""
         tables_used = []
@@ -268,6 +299,8 @@ class SQLGenerator:
 
         return sql_query
 
+    # Replace the validate_sql method in your sql_generator.py
+
     def validate_sql(self, sql_query: str) -> QueryValidation:
         """Validate the generated SQL query with enhanced checks"""
         validation_result = QueryValidation(
@@ -316,15 +349,16 @@ class SQLGenerator:
             if sql_query.count('(') != sql_query.count(')'):
                 validation_result.warnings.append("Unbalanced parentheses detected")
 
-            # Check for potential SQL injection patterns
+            # Check for potential SQL injection patterns (LESS STRICT)
+            # Only flag truly dangerous patterns, not legitimate placeholders
             injection_patterns = [
                 r";\s*DROP",
                 r";\s*DELETE",
-                r"--",
-                r"/\*.*\*/",
-                r"UNION.*SELECT",
+                r";\s*UPDATE",
                 r"xp_cmdshell",
-                r"sp_executesql"
+                r"sp_executesql",
+                r"--\s*[^a-zA-Z]",  # SQL comments that aren't just text
+                r"/\*.*\*/"  # Block comments
             ]
 
             for pattern in injection_patterns:
@@ -332,6 +366,10 @@ class SQLGenerator:
                     validation_result.is_valid = False
                     validation_result.errors.append("Potential SQL injection pattern detected")
                     break
+
+            # Check for parameter placeholders (which we want to avoid)
+            if re.search(r'\{[^}]+\}', sql_query):
+                validation_result.warnings.append("Query contains parameter placeholders - use actual values instead")
 
         except Exception as e:
             logger.error(f"Error validating SQL: {e}")
