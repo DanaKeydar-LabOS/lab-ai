@@ -1,0 +1,137 @@
+{
+    "table": "m",
+    "display_name": "Machines",
+    "alias": "m",
+    "description": "Machines",
+    "fields": {
+        "lastupdate": "last setup update (int)",
+        "mactivateqcrules": "Activate Qc rules for patients results (tinyint)",
+        "mactive": "Active (tinyint)",
+        "maddtoanalytical": "No Documentation for this Field (tinyint)",
+        "mcancel": "Use to indicate that the machine is incactive (tinyint)",
+        "mcanconfirm": "Set the machine as able to do reciept confirmation (tinyint)",
+        "mcode": "Machine code (by name) (nvarchar)",
+        "mcodei": "Machine code (by number) (smallint)",
+        "mconcentrator": "Set the machine as concentrator (tinyint)",
+        "mcount": "Size of count (when the analyzer is a counting analyzer) (smallint)",
+        "mdefinition": "Machine definition (tinyint)",
+        "mentitytype": "Entity type (tinyint)",
+        "mgroup": "Group of machines (smallint)",
+        "mhardautoconfirm": "No Documentation for this Field (smallint)",
+        "mhourstoreset": "Time to reset the status of QC (smallint)",
+        "mid": "ID of workbench document id (nvarchar)",
+        "mispoc": "define weather the machine is poc or not (tinyint)",
+        "misshared": "No Documentation for this Field (tinyint)",
+        "mlab": "Lab code (smallint)",
+        "mmanuf": "Manufacturer's name (nvarchar)",
+        "mmanul": "Manual machine (tinyint)",
+        "mmodel": "Machine model (nvarchar)",
+        "mname": "Machine name (nvarchar)",
+        "mnotchangestatus": "Doesn't allow change of status (tinyint)",
+        "mpocfacility": "define the poc facility (int)",
+        "mpreanalitical": "Set the machine as pre-analitical (tinyint)",
+        "mprof": "Differential profile related (int)",
+        "mqcstatus": "Qc status summary of the workbench analytes (tinyint)",
+        "mqcstatusgroup": "Qc status group severity (smallint)",
+        "mracktcode": "defines the specific rack type code of the machine (smallint)",
+        "msendbyuser": "Waiting to be sent to machine (tinyint)",
+        "msendreqtotray": "Sending a single sample to tray (tinyint)",
+        "msendtosite": "send to site code (int)",
+        "msite": "NO SUCH ENTITY IN CODE (int)",
+        "mstaterule": "this field will hold the state rule for each test this analyzer returns (int)",
+        "mstation": "Machine station (smallint)",
+        "mtcode": "defines the specific tube type code of the machine (smallint)",
+        "mtechapp": "Technical approve is required (tinyint)",
+        "mtray": "Tray code (smallint)",
+        "mtype": "Communication type (smallint)",
+        "muser": "Not Active (smallint)",
+        "trans_change": "NO SUCH ENTITY IN CODE (tinyint)",
+        "trans_level": "NO SUCH ENTITY IN CODE (tinyint)",
+        "trans_station": "NO SUCH ENTITY IN CODE (smallint)"
+    },
+    "joins": {
+        "ao": "m.mcodei = ao.acmachine",
+        "r": [
+            "m.mcodei = r.rinst",
+            "m.mcodei = r.rphinst"
+        ],
+        "ar": "m.mcodei = ar.arinst",
+        "rr": "m.mcodei = rr.rrinst",
+        "c": "m.mcodei = c.cinst"
+    },
+    "examples": [
+        {
+            "query": "SELECT * FROM m(NOLOCK) WHERE m.mmanul={manual_type} AND m.msendtosite={target_site} AND m.mentitytype={entity_type} AND EXISTS (SELECT * FROM ms(NOLOCK) WHERE m.mcodei=ms.msmachine AND ms.mssite={machine_site})",
+            "description": "Retrieve machines by manual type, target site, and entity type with machine site validation through EXISTS subquery",
+            "parameters": {
+                "manual_type": "Manual machine type (e.g., 8)",
+                "target_site": "Target send-to site code (e.g., 400)",
+                "entity_type": "Entity type (e.g., 1)",
+                "machine_site": "Machine site code for validation (e.g., 3)"
+            }
+        },
+        {
+            "query": "SELECT * FROM m(NOLOCK) WHERE m.mcodei={machine_code}",
+            "description": "Retrieve specific machine by machine code number",
+            "parameters": {
+                "machine_code": "Machine code number (e.g., 10576)"
+            }
+        },
+        {
+            "query": "SELECT * FROM pr(NOLOCK),m(NOLOCK),mc(NOLOCK) WHERE mctest=prtest AND mcodei=mcmaching AND pr.prtoana=0 AND pr.prdate>={start_date} AND pr.prdate<={end_date} AND m.mpreanalitical=1 AND pr.prisreject=0 AND pr.prdate={specific_date} AND pr.prordno={order_number} AND EXISTS (SELECT * FROM psa(NOLOCK) WHERE pr.prdate=psa.psadate AND pr.prordno=psa.psaordno AND pr.prtubenum=psa.psatubenum AND (pr.prlabel<>0 OR (pr.prlabel=0 AND (psa.psaformattedlabel is not null AND psa.psaformattedlabel<>''))) AND psa.psastatus<={max_status}) ORDER BY pr.prdate ASC,pr.prordno ASC,pr.prlabel ASC",
+            "description": "Complex query joining preliminary results, machines, and machine configurations with pre-analytical filtering, sample validation, and comprehensive ordering",
+            "parameters": {
+                "start_date": "Start date in YYYYMMDD format (e.g., 20250813)",
+                "end_date": "End date in YYYYMMDD format (e.g., 20250823)",
+                "specific_date": "Specific preliminary result date (e.g., 20250820)",
+                "order_number": "Order number (e.g., 116078914)",
+                "max_status": "Maximum sample status (e.g., 549)"
+            }
+        },
+        {
+            "query": "SELECT * FROM m(NOLOCK) WHERE (m.mcodei={machine_code1} OR m.mcodei={machine_code2} OR m.mcodei={machine_code3} OR m.mcodei={machine_code4})",
+            "description": "Retrieve multiple specific machines by machine code numbers",
+            "parameters": {
+                "machine_code1": "First machine code (e.g., 2820)",
+                "machine_code2": "Second machine code (e.g., 5131)",
+                "machine_code3": "Third machine code (e.g., 10553)",
+                "machine_code4": "Fourth machine code (e.g., 10556)"
+            }
+        },
+        {
+            "query": "SELECT * FROM m(NOLOCK) WHERE m.mlab={lab_code} AND m.mactive=1 AND m.mcancel=0",
+            "description": "Retrieve active, non-cancelled machines for a specific laboratory",
+            "parameters": {
+                "lab_code": "Laboratory code (e.g., 1)"
+            }
+        },
+        {
+            "query": "SELECT * FROM m(NOLOCK) WHERE m.mpreanalitical={preanalytical_flag} AND m.mentitytype={entity_type} ORDER BY m.mname ASC",
+            "description": "Retrieve machines by pre-analytical flag and entity type, ordered by machine name",
+            "parameters": {
+                "preanalytical_flag": "Pre-analytical flag (e.g., 1)",
+                "entity_type": "Entity type (e.g., 1)"
+            }
+        },
+        {
+            "query": "SELECT * FROM m(NOLOCK) WHERE m.mispoc={poc_flag} AND m.mpocfacility={facility_code}",
+            "description": "Retrieve point-of-care machines for a specific facility",
+            "parameters": {
+                "poc_flag": "Point-of-care flag (e.g., 1)",
+                "facility_code": "POC facility code (e.g., 100)"
+            }
+        },
+        {
+            "query": "SELECT * FROM m(NOLOCK) WHERE m.mgroup={machine_group} AND m.mqcstatus={qc_status} ORDER BY m.mcodei ASC",
+            "description": "Retrieve machines by group and QC status, ordered by machine code",
+            "parameters": {
+                "machine_group": "Machine group code (e.g., 1)",
+                "qc_status": "QC status (e.g., 1)"
+            }
+        }
+    ],
+    "Indexes": {
+        "INDEX0_UNQ_M": "nonclustered, unique located on PRIMARY (mcode)",
+        "INDEX1_UNQ_M": "nonclustered, unique located on PRIMARY (mcodei)"
+    }
+}

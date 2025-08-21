@@ -1,0 +1,33 @@
+{
+    "table": "cti",
+    "display_name": "Tests Times",
+    "alias": "cti",
+    "description": "Tests Execution Times",
+    "fields": {
+        "ctiaction": "action to be performed after calculating test time (int)",
+        "ctiallevel": "Alert Priority (smallint)",
+        "ctialtype": "Alert Type (smallint)",
+        "cticode": "Test Code (int)",
+        "ctientity": "the entity that the definition refers to (tinyint)",
+        "ctifrom": "from what test stage to be calculated by TestTimer (smallint)",
+        "ctikey": "cti key (int)",
+        "ctiperformsite": "cti can be define per performing site (int)",
+        "ctiresult": "REMOVED FROM CODE IN CL# 104306 IMA# 262001 (nvarchar)",
+        "ctistage": "Not Active (smallint)",
+        "ctistrkey": "REMOVED FROM CODE IN CL# 104307 IMA# 232001 (nvarchar)",
+        "ctitime": "Test Time (int)",
+        "ctito": "until what test stage to be calculated by TestTimer (smallint)",
+        "ctitype": "test time type (smallint)",
+        "ctiunits": "Units Of Time (tinyint)",
+        "ctiurglevel": "Urgency (tinyint)",
+        "lastupdate": "last setup update (int)"
+    },
+    "joins": {
+        "c": "cti.cticode = c.ccode"
+    },
+    "examples": [],
+    "Indexes": {
+        "INDEX0_UNQ_CTI": "nonclustered, unique located on PRIMARY (ctikey)",
+        "INDEX1_UNQ_CTI": "nonclustered, unique located on PRIMARY (cticode, ctiurglevel, ctitype, ctifrom, ctito, ctiperformsite)"
+    }
+}

@@ -1,0 +1,208 @@
+{
+    "table": "c",
+    "display_name": "Tests",
+    "alias": "c",
+    "description": "Tests",
+    "fields": {
+        "caddpermition": "Permission For Adding Test (tinyint)",
+        "calert": "Result Validity - Number Of Days Back To Alert In Reqwin If This Test Has Already Been Ordered For This Patient (int)",
+        "cautoreplace": "Auto Substitution At Emergency (tinyint)",
+        "cbillcount": "Not Active (tinyint)",
+        "cbillformula": "Formula Code for Calculating Billing Debit (int)",
+        "cbillmapformula": "Description Formula Code for Calculating Test Service Mapping (int)",
+        "cblindentry": "number of returns of entering the result per test (tinyint)",
+        "cblood": "Substence Quantity Required For The Test (real)",
+        "cboundscomm": "Does The Test Has A Reflex Definition For Comments In bounds Table (tinyint)",
+        "ccancel": "Cancelled Test (tinyint)",
+        "ccancelcollect": "No Documentation for this Field (tinyint)",
+        "ccap": "Cap Time (smallint)",
+        "ccode": "Main Code (int)",
+        "ccollectpermition": "No Documentation for this Field (tinyint)",
+        "cconf1": "Reagent Expiry (tinyint)",
+        "cconfirmpermition": "Permission For Result Approval (tinyint)",
+        "ccontinue": "Not Active (int)",
+        "ccost": "Test Cost (real)",
+        "ccount": "Is The Test Counted For Statistics (tinyint)",
+        "ccpt4": "Cpt4 Code (nvarchar)",
+        "cdaysinar": "Minimum Days In Archive (smallint)",
+        "cdaysinr": "Minimum Days In Worklist (smallint)",
+        "cdblenter": "Double Entry Of Result Is Required (tinyint)",
+        "cdec": "Number Of digits After The Decimal Point (tinyint)",
+        "cdeltd": "Max Time Range For Delta (int)",
+        "cdeltm": "Max Decrease For Delta Check (real)",
+        "cdeltp": "Max Increase For Delta Check (real)",
+        "cdeltt": "Delta Check - Measures (tinyint)",
+        "cdistest": "Cumulitive Card Reference Test (int)",
+        "cdistformula": "Code For Print Formula (smallint)",
+        "cdistribute": "Distribution Group (tinyint)",
+        "cduplicate": "Duplicate In Requsition (Allowed Or Not) (tinyint)",
+        "cemerg": "Analyzer For Test When The Test Is Urgent (smallint)",
+        "cfill": "Empty Result (nvarchar)",
+        "cflagformula": "Code For Flag Determining Formula (smallint)",
+        "cformat": "Print Format (smallint)",
+        "cformula": "Code For Result Formula (int)",
+        "cformularules": "Is there an formula rule for this test (tinyint)",
+        "cgenerate": "Automatic Request Generation (int)",
+        "chard": "If Profile - Is Rigid (tinyint)",
+        "chasremark": "Flag For Const Comments For The Test (tinyint)",
+        "chead": "Print Title (smallint)",
+        "cid": "Test object identifier in external db (object id of test document in MongoDb) (nvarchar)",
+        "cinfoformula": "Code For View Formula (smallint)",
+        "cinst": "Default Analyzer For Test (smallint)",
+        "cinstformula": "Code For Analyzer Determinig Formula (int)",
+        "cisprocres": "Flag For Process Definition In Bounds Table (tinyint)",
+        "cisreruns": "Flag For Reflex Definition In Bounds Table (tinyint)",
+        "clab": "Lab Code (smallint)",
+        "clabelingformula": "Formula code for labeling scheme (int)",
+        "clabelsnum": "Sample label copies (tinyint)",
+        "clong": "Long Name (nvarchar)",
+        "cmicro": "Micro Test Type (smallint)",
+        "cminblood": "No Documentation for this Field (real)",
+        "cmultipleresults": "No Documentation for this Field (tinyint)",
+        "cmustres": "Result Mandatory (tinyint)",
+        "copenimd": "Panel Opens To Tests In Reqwin (Volatile) (tinyint)",
+        "copenpartial": "Partial Open Profile (in req window) (tinyint)",
+        "corderable": "Is test orderable (smallint)",
+        "corgtype": "Type Of Organism (tinyint)",
+        "cperformsite": "Performing Site (int)",
+        "cphonedelttime": "Delta for redistributing abnormal results via phone (int)",
+        "cpositin": "Print Order (smallint)",
+        "cprep": "Preperation Time (smallint)",
+        "cprfoil": "Test Type (int)",
+        "cpric1": "Price1 (real)",
+        "cpric2": "Price2 (real)",
+        "cpric3": "Price3 (real)",
+        "cpric4": "Price4 (real)",
+        "cpric5": "Price5 (real)",
+        "cpric6": "Price6 (real)",
+        "cpric7": "Price7 (real)",
+        "cpric8": "Price8 (real)",
+        "cpric9": "Price9 (real)",
+        "cprint": "Confidentiality (tinyint)",
+        "cprintprev": "Print Previous Result (tinyint)",
+        "cpriority": "Not Active (smallint)",
+        "cproduction": "Not Active (tinyint)",
+        "crange": "Prevent Approval In A Group (tinyint)",
+        "crcvanavar": "No Documentation for this Field (real)",
+        "crcvbiovar": "No Documentation for this Field (real)",
+        "crelated": "Reflex Related (tinyint)",
+        "creplace": "Test Code For Substitution At Emergency (int)",
+        "creqpriority": "Priority for Test/Profile Collision (tinyint)",
+        "creslist": "Result List Code If The Result Type Is A List (creslist=4) (smallint)",
+        "crestricteddist": "No Documentation for this Field (tinyint)",
+        "crestyp": "Result Type (tinyint)",
+        "csampletype": "Not Active (smallint)",
+        "csampling": "User Sample Parameter For Sampling (smallint)",
+        "csecondarytubetype": "No Documentation for this Field (smallint)",
+        "cservicetype": "No Documentation for this Field (smallint)",
+        "cshort": "Short Name (nvarchar)",
+        "csndtoins": "Communicated Or Not (tinyint)",
+        "csort": "View Order (smallint)",
+        "csource": "Source Of Record (tinyint)",
+        "cstates": "Flag For State Rules Defined For Test (tinyint)",
+        "csubst": "Substence (smallint)",
+        "ctime": "Test Time (smallint)",
+        "ctubetype": "Container (Tube Type) (smallint)",
+        "cundefined": "The test is currently not defined in the system. (tinyint)",
+        "cunicode": "Not Active (smallint)",
+        "cunifyresult": "Not Active (tinyint)",
+        "cunits": "Units (smallint)",
+        "curgent": "Not Active (tinyint)",
+        "cviewpermition": "Permission For Viewing Test (tinyint)",
+        "lastupdate": "Last Setup update (int)"
+    },
+    "joins": {
+        "ao": "c.ccode = ao.actest",
+        "r": "c.ccode = r.rtest",
+        "ar": [
+            "c.clab = ar.arlab",
+            "c.ccode = ar.artest"
+        ],
+        "sa": "c.csampling = sa.saparameter",
+        "cti": "c.ccode = cti.cticode",
+        "mc": "c.ccode = mc.mctest",
+        "asa": "c.csampling = asa.asaparameter"
+    },
+    "examples": [
+        {
+            "query": "SELECT * FROM c(NOLOCK) WHERE c.ccode={test_code}",
+            "description": "Retrieve test definition by test code",
+            "parameters": {
+                "test_code": "Test code identifier (e.g., 20907302)"
+            }
+        },
+        {
+            "query": "SELECT * FROM p(NOLOCK) join c(NOLOCK) on ptestc=ccode WHERE p.pcode={profile_code} AND p.pdsp<>{display_flag} AND c.ccancel=0",
+            "description": "Retrieve active tests within a profile, excluding cancelled tests and specific display settings",
+            "parameters": {
+                "profile_code": "Profile code (e.g., 907303)",
+                "display_flag": "Display flag to exclude (e.g., 0)"
+            }
+        },
+        {
+            "query": "SELECT * FROM r(NOLOCK) join c(NOLOCK) on rtest=ccode WHERE r.rordno={order_number} AND r.rdate={result_date} AND r.rtestnum={test_number}",
+            "description": "Retrieve test results with test definitions by order number, date, and test sequence",
+            "parameters": {
+                "order_number": "Order number (e.g., 116079335)",
+                "result_date": "Result date in YYYYMMDD format (e.g., 20250820)",
+                "test_number": "Test sequence number within order (e.g., 95)"
+            }
+        },
+        {
+            "query": "SELECT * FROM p(NOLOCK) join c(NOLOCK) on ptestc=ccode WHERE p.pcode={profile_code}",
+            "description": "Retrieve all tests within a specific profile with their test definitions",
+            "parameters": {
+                "profile_code": "Profile code (e.g., 900323)"
+            }
+        },
+        {
+            "query": "SELECT * FROM p(NOLOCK) join c(NOLOCK) on ptestc=ccode WHERE p.pcode={profile_code} AND p.pdsp<>{display_flag} AND c.ccancel=0 ORDER BY p.prelatedto ASC",
+            "description": "Retrieve active tests within a profile ordered by relationship hierarchy, excluding cancelled tests",
+            "parameters": {
+                "profile_code": "Profile code (e.g., 3000)",
+                "display_flag": "Display flag to exclude (e.g., 0)"
+            }
+        },
+        {
+            "query": "SELECT * FROM pr(NOLOCK) WHERE pr.prdate={result_date} AND pr.prordno={order_number} AND EXISTS (SELECT * FROM c(NOLOCK) WHERE pr.prtest=c.ccode AND c.cmicro>={micro_start} AND c.cmicro<={micro_end})",
+            "description": "Retrieve preliminary results with micro test type validation within specified range",
+            "parameters": {
+                "result_date": "Result date in YYYYMMDD format (e.g., 20250819)",
+                "order_number": "Order number (e.g., 116047422)",
+                "micro_start": "Micro test type range start (e.g., 10)",
+                "micro_end": "Micro test type range end (e.g., 15)"
+            }
+        },
+        {
+            "query": "SELECT * FROM c(NOLOCK) WHERE c.clab={lab_code} AND c.ccancel=0 AND c.corderable>0",
+            "description": "Retrieve active, orderable tests for a specific laboratory",
+            "parameters": {
+                "lab_code": "Laboratory code (e.g., 1)"
+            }
+        },
+        {
+            "query": "SELECT * FROM c(NOLOCK) WHERE c.cprfoil={test_type} AND c.ccancel=0 ORDER BY c.cshort ASC",
+            "description": "Retrieve active tests by test type, ordered by short name",
+            "parameters": {
+                "test_type": "Test type code (e.g., 1)"
+            }
+        },
+        {
+            "query": "SELECT * FROM c(NOLOCK) WHERE c.cmicro BETWEEN {micro_start} AND {micro_end} AND c.ccancel=0",
+            "description": "Retrieve active tests within a specific micro test type range",
+            "parameters": {
+                "micro_start": "Micro test type range start (e.g., 10)",
+                "micro_end": "Micro test type range end (e.g., 15)"
+            }
+        }
+    ],
+    "Indexes": {
+        "INDEX0_UNQ_C": "clustered, unique located on PRIMARY (ccode)",
+        "INDEX1_C": "nonclustered located on PRIMARY (ccode, ccpt4)",
+        "INDEX2_C": "nonclustered located on PRIMARY (cprfoil)",
+        "INDEX3_C": "nonclustered located on PRIMARY (cshort)",
+        "INDEX4_C": "nonclustered located on PRIMARY (cshort, cmicro, cprfoil, clong, corgtype, ccode, ccpt4, clab)",
+        "INDEX5_C": "nonclustered located on PRIMARY (cmicro)",
+        "INDEX6_C": "nonclustered located on PRIMARY (cbillformula)"
+    }
+}

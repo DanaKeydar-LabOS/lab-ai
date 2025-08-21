@@ -1,0 +1,45 @@
+{
+    "table": "rr",
+    "display_name": "Runs",
+    "alias": "rr",
+    "description": "Runs In Current",
+    "fields": {
+        "rrdate": "Run Date (Insert Date) (int)",
+        "rrdilution": "Dilution For Run (real)",
+        "rrexecdate": "Execution Date (Execution Date In The Analyzer) (int)",
+        "rrexectime": "Execution Time (Execution Time In The Analyzer) (smallint)",
+        "rrindate": "Insert Date To Autolab (int)",
+        "rrinst": "Analyzer's Code For This Run (smallint)",
+        "rrintime": "Insert Time To Autolab (smallint)",
+        "rrlabel": "Run Label (External) (int)",
+        "rrlocation": "Location In Tray (smallint)",
+        "rrmaterial": "Not Active (int)",
+        "rrmic": "mic results - micro (nvarchar)",
+        "rrnumber": "Run Number (Internal For The Test) (smallint)",
+        "rrorig": "Original Run Result (nvarchar)",
+        "rrqcstatus": "Status Qc For Run (tinyint)",
+        "rrresult": "Run Result (Original Or After Process) (nvarchar)",
+        "rrstatus": "Run Status (smallint)",
+        "rrtest": "Test Code (int)",
+        "rrtestnum": "Test Number In R Of The Test (smallint)",
+        "rrtray": "Tray Number (int)",
+        "rrtrayname": "Tray Name Which The Analyzer Returned (nvarchar)",
+        "rruser": "User Code Of The User That Gave The Result (smallint)",
+        "rruserpoint1": "Not Active (int)",
+        "rruserpoint2": "Not Active (int)",
+        "rruserpoint3": "Not Active (int)"
+    },
+    "joins": {
+        "r": [
+            "rr.rrlabel = r.rlabel",
+            "rr.rrtest = r.rtest"
+        ]
+    },
+    "examples": [],
+    "Indexes": {
+        "INDEX0_UNQ_RR": "nonclustered, unique located on PRIMARY (rrlabel, rrtestnum, rrdate, rrnumber)",
+        "INDEX1_RR": "nonclustered located on PRIMARY (rrtray, rrlocation)",
+        "INDEX2_RR": "nonclustered located on PRIMARY (rrdate, rrlabel)",
+        "INDEX3_RR": "nonclustered located on PRIMARY (rrdate, rrlabel, rrtestnum, rrnumber(-))"
+    }
+}

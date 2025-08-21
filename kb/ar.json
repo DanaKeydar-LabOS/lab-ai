@@ -1,0 +1,130 @@
+{
+    "table": "ar",
+    "display_name": "Archived Requests (Tests)",
+    "alias": "ar",
+    "description": "Tests In Archive",
+    "fields": {
+        "aractiverun": "Number of Active Run (smallint)",
+        "arappdate": "Approve Date (int)",
+        "arapptime": "Approve Time (smallint)",
+        "arbillcount": "Does The Test Count For Billing (tinyint)",
+        "arbounds": "Bounds Of Test (tinyint)",
+        "arboundsvalue": "Bounds Value for the Test (nvarchar)",
+        "arcommconst": "Count Of Const Comments For The Tests (smallint)",
+        "arcommfree": "Count Of Free Comments For The Tests (smallint)",
+        "arcount": "Does The Test Count For Statistics (tinyint)",
+        "ardate": "Test Date (int)",
+        "ardelta": "Does The Test Had A Delta Flag ? (tinyint)",
+        "ardynamictime": "Dynamic Time of The Test (smallint)",
+        "arflag": "Formula Code For Flags (smallint)",
+        "argraph": "Does The Test Has Graph ? (tinyint)",
+        "arhead": "Printing Title For The Test (smallint)",
+        "arinprof": "The Code of The Panel That Contains The Test Or Panel Type If The Test Is A Panel (int)",
+        "arinsertdate": "Typing Date Of The Test (Or Generating Date) (int)",
+        "arinserttime": "Typing Time Of The Test (Or Generating Time) (smallint)",
+        "arinst": "Machine Code Of The Test (smallint)",
+        "arisprofile": "the test is a profile (Y\\N) (tinyint)",
+        "arisreject": "Was The Test Canceled? (tinyint)",
+        "arlab": "Lab Code For Test (smallint)",
+        "arlabel": "Test Label (external Number) (int)",
+        "arlaststatus": "last status of sample (smallint)",
+        "armnstatus": "Medical Necessity status of the test (tinyint)",
+        "arnumresult": "numeric Result Of The Test (float)",
+        "arordno": "Test Number (Internal) (int)",
+        "arorigtest": "Test Number (testnum) Of The Original Test That This Test Added From By Reflex (smallint)",
+        "arparam": "Parameters For The Test (abcdefghij) (int)",
+        "arperformsite": "Performing Site For The Test (int)",
+        "arphonedist": "Is a Telephone Reporting Requierd/Performed (int)",
+        "arprice": "The Price For The Test (By The Definition Of The Sender And Cprice1-9) (real)",
+        "arprint": "Should The Test Be printed ? (tinyint)",
+        "arprnsort": "Printing Sort Of The Test (smallint)",
+        "arprofnum": "If The Test Is A Part Of A Profile - What Is The Testnum (Artestnum) Of The Profile (smallint)",
+        "arquantity": "quantity of the test (real)",
+        "arresstat": "Result Status (tinyint)",
+        "arresult": "The Result Of The Test (nvarchar)",
+        "arresultn": "Numeric Result Of The Test (tinyint)",
+        "artechapp": "User Code Of The User That Approved The Test Tech Approve When A Tech Approve Is Required (smallint)",
+        "artest": "Test Code (int)",
+        "artestnum": "The Number Of The Test In The Whole Order (smallint)",
+        "artubenum": "Tube Type Code (smallint)",
+        "arunits": "The Test Units (nvarchar)",
+        "arurgent": "Is The Test Urgent? (tinyint)",
+        "aruser": "The User Code Of The User That Approved The Test Clinical Approve (smallint)"
+    },
+    "joins": {
+        "arr": [
+            "ar.aractiverun = arr.rrnumber",
+            "ar.ardate = arr.rrdate",
+            "ar.arlabel = arr.rrlabel",
+            "ar.artest = arr.rrtest",
+            "ar.artestnum = arr.rrtestnum"
+        ],
+        "c": [
+            "ar.arlab = c.clab",
+            "ar.artest = c.ccode"
+        ],
+        "ao": "ar.arordno = ao.aoordno"
+    },
+    "examples": [
+        {
+            "query": "SELECT * FROM ao(NOLOCK) join ar(NOLOCK) on arordno=aoordno AND ardate=aodate WHERE (ao.aodate<={cutoff_date} OR (ao.aodate={target_date} AND ao.aotime<={cutoff_time})) AND NOT (ao.aoordno={excluded_order} AND ao.aodate={excluded_date}) AND ar.artest={test_code} AND ao.aopatcode={patient_code} AND ao.aodate<={max_date} AND ao.aotype<>{excluded_type} AND ar.ardynamictime=0 ORDER BY ao.aodate DESC",
+            "description": "Retrieve patient test results with orders up to a specific date/time, excluding certain orders and order types, filtered by test code and patient",
+            "parameters": {
+                "cutoff_date": "Cutoff date in YYYYMMDD format (e.g., 20250819)",
+                "target_date": "Target date for time comparison in YYYYMMDD format (e.g., 20250820)",
+                "cutoff_time": "Cutoff time in HHMM format (e.g., 2127)",
+                "excluded_order": "Order number to exclude (e.g., 116112560)",
+                "excluded_date": "Date of excluded order (e.g., 20250820)",
+                "test_code": "Test code to filter by (e.g., 60907231)",
+                "patient_code": "Patient code (e.g., 68529913)",
+                "max_date": "Maximum order date (e.g., 20250820)",
+                "excluded_type": "Order type to exclude (e.g., 2)"
+            }
+        },
+        {
+            "query": "SELECT * FROM ar(NOLOCK) WHERE ar.ardate={test_date} AND ar.arordno={order_number} AND ar.artubenum={tube_type}",
+            "description": "Retrieve specific archived test results by date, order number, and tube type",
+            "parameters": {
+                "test_date": "Test date in YYYYMMDD format (e.g., 20250731)",
+                "order_number": "Internal order number (e.g., 115449513)",
+                "tube_type": "Tube type code (e.g., 3)"
+            }
+        },
+        {
+            "query": "SELECT * FROM ar(NOLOCK) WHERE ar.artest={test_code} AND ar.ardate BETWEEN {start_date} AND {end_date} AND ar.arresstat={result_status}",
+            "description": "Retrieve archived test results by test code within a date range and specific result status",
+            "parameters": {
+                "test_code": "Test code to filter by (e.g., 60907231)",
+                "start_date": "Start date in YYYYMMDD format (e.g., 20240101)",
+                "end_date": "End date in YYYYMMDD format (e.g., 20241231)",
+                "result_status": "Result status code (e.g., 1)"
+            }
+        },
+        {
+            "query": "SELECT * FROM ar(NOLOCK) WHERE ar.arordno={order_number} AND ar.ardate={test_date} ORDER BY ar.artestnum ASC",
+            "description": "Retrieve all tests for a specific order and date, ordered by test sequence number",
+            "parameters": {
+                "order_number": "Internal order number (e.g., 115449513)",
+                "test_date": "Test date in YYYYMMDD format (e.g., 20250731)"
+            }
+        },
+        {
+            "query": "SELECT * FROM ar(NOLOCK) WHERE ar.artest={test_code} AND ar.arinst={machine_code} AND ar.ardate={test_date} AND ar.arcount=1",
+            "description": "Retrieve tests by test code and machine, filtered by date and counting for statistics",
+            "parameters": {
+                "test_code": "Test code to filter by (e.g., 30907231)",
+                "machine_code": "Machine code (e.g., 101)",
+                "test_date": "Test date in YYYYMMDD format (e.g., 20250820)"
+            }
+        }
+    ],
+    "Indexes": {
+        "INDEX1_AR": "clustered located on PRIMARY (arordno, ardate, artest)",
+        "INDEX0_UNQ_AR": "nonclustered, unique located on PRIMARY (arordno, ardate, artestnum)",
+        "INDEX2_AR": "nonclustered located on PRIMARY (ardate, arinst, arcount, arbounds)",
+        "INDEX3_AR": "nonclustered located on PRIMARY (artest, ardate, arinst, arlab, arresstat)",
+        "INDEX4_AR": "nonclustered located on PRIMARY (arordno, ardate, artest, arlab, arprice, arcount)",
+        "INDEX5_AR": "nonclustered located on PRIMARY (artest, arordno, ardate)",
+        "INDEX6_AR": "nonclustered located on PRIMARY (arlabel, arordno, ardate)"
+    }
+}

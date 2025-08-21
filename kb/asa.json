@@ -1,0 +1,138 @@
+{
+    "table": "asa",
+    "display_name": "Archived Samples",
+    "alias": "asa",
+    "description": "Samples In Archive",
+    "fields": {
+        "asacolldate": "Collection Date (int)",
+        "asacollector": "The Collector (Phlebotomist) (smallint)",
+        "asacollplace": "Collection Place (int)",
+        "asacolltime": "Collection Time (smallint)",
+        "asacommconst": "Count Of Const Remarks For Sample (smallint)",
+        "asacommfree": "Count Of Free Remarks For Sample (smallint)",
+        "asacurrsite": "No Documentation for this Field (int)",
+        "asadate": "Sample Date (int)",
+        "asadetails": "Not Active (int)",
+        "asadur": "Duration For Collection (smallint)",
+        "asadynamictime": "Dynamic Time When Sampled By Dynamic Time (smallint)",
+        "asaformattedlabel": "This field will hold the formatted accession(alphanumeric ) includes the prefix. (nvarchar)",
+        "asainprof": "Profile Related by the Sample (pathology) (int)",
+        "asalab": "Lab Code (smallint)",
+        "asalabel": "Sample Label (External) (int)",
+        "asalaststatus": "last sample status (smallint)",
+        "asanextsite": "No Documentation for this Field (int)",
+        "asaordno": "Sample Number (Internal) (int)",
+        "asaorigtest": "Not Active (int)",
+        "asaorigtube": "Not Active (int)",
+        "asaparameter": "Parameter For Sampling (By \"Csampling\" In Table C (smallint)",
+        "asapatcode": "Patient Code (int)",
+        "asaperformsite": "Performing Site Of Sample (int)",
+        "asaphysicalstatus": "No Documentation for this Field (smallint)",
+        "asaprocedure": "Procedure Relate to the Sample (Pathology) (nvarchar)",
+        "asaproctestnum": "procedure test num (nvarchar)",
+        "asaquantity": "Not Active (real)",
+        "asareceiveddate": "reciept confirmation date (int)",
+        "asareceivedtime": "reciept confirmation time (smallint)",
+        "asareusedate": "point to the original sample date (asadate) that reused (in the original sample this fiels will be 0) (int)",
+        "asareuseordno": "point to the original sample ordno (asaordno) that reused (in the original sample this fiels will be 0) (int)",
+        "asareusetubenum": "point to the original sample tube num (asatubenum) that reused (in the original sample this fiels will be 0) (smallint)",
+        "asasmplvl": "indicate the sampling level - deffered (-3) / PSC (-2) / at lab (0) (smallint)",
+        "asasource": "Not Active (tinyint)",
+        "asastation": "Analyzer's Code When Sampling By Station (smallint)",
+        "asasublabel": "Sub Label For Pathology Sample (int)",
+        "asasubst": "Substence Of Sample (smallint)",
+        "asasuspect": "Is Patient Suspected For HIV (smallint)",
+        "asatime": "Sample Time (smallint)",
+        "asatubenum": "Sample Number (internal) In The Whole Order (smallint)",
+        "asatubetype": "Tube Type Of The Sample (for sampling by tube type) (smallint)",
+        "asatype": "Not Active (smallint)",
+        "asatz": "Patient ID (nvarchar)",
+        "asavol": "Volume For Sample (real)"
+    },
+    "joins": {
+        "ao": "asa.asaordno = ao.aoordno",
+        "c": "asa.asaparameter = c.csampling",
+        "i": "asa.asapatcode = i.icode"
+    },
+    "examples": [
+        {
+            "query": "SELECT * FROM asa(NOLOCK) WHERE (asa.asaordno={order_number} AND asa.asadate={sample_date}) ORDER BY asa.asatubenum ASC",
+            "description": "Retrieve all samples for a specific order and date, ordered by tube number",
+            "parameters": {
+                "order_number": "Internal order number (e.g., 115917040)",
+                "sample_date": "Sample date in YYYYMMDD format (e.g., 20250814)"
+            }
+        },
+        {
+            "query": "SELECT * FROM asa(NOLOCK) WHERE asa.asadate={sample_date} AND asa.asaordno={order_number} AND asa.asatubenum={tube_number}",
+            "description": "Retrieve a specific sample by date, order number, and tube number",
+            "parameters": {
+                "sample_date": "Sample date in YYYYMMDD format (e.g., 20250820)",
+                "order_number": "Internal order number (e.g., 116113426)",
+                "tube_number": "Tube number within the order (e.g., 0)"
+            }
+        },
+        {
+            "query": "SELECT COUNT(*) AS RET FROM asa(NOLOCK) WHERE (asa.asalabel={sample_label} AND (asa.asatubenum={tube_number} AND asa.asaordno={order_number}))",
+            "description": "Count samples matching specific label, tube number, and order number criteria",
+            "parameters": {
+                "sample_label": "External sample label (e.g., 26561331)",
+                "tube_number": "Tube number within the order (e.g., 2)",
+                "order_number": "Internal order number (e.g., 116002078)"
+            }
+        },
+        {
+            "query": "SELECT ao.*,ar.*,i.* FROM ao(NOLOCK),ar(NOLOCK),i(NOLOCK),asa(NOLOCK) WHERE arordno=aoordno AND ardate=aodate AND aopatcode=icode AND ar.ardate=asa.asadate AND ar.arordno=asa.asaordno AND ar.artubenum=asa.asatubenum AND ao.aodate>={start_date} AND ao.aodate<={end_date} AND ar.arappdate>={approval_start} AND ar.arappdate<={approval_end} AND ao.aosndcod in ({sender_codes}) AND ar.arisreject=0 AND ar.artest={test_code} AND asa.asacollplace={collection_place} AND i.idob>={dob_start} AND i.idob<={dob_end} ORDER BY ao.aodate ASC,ao.aoordno ASC",
+            "description": "Comprehensive query joining orders, tests, patients, and samples with date ranges, sender filtering, test criteria, and collection place restrictions",
+            "parameters": {
+                "start_date": "Order start date in YYYYMMDD format (e.g., 20250708)",
+                "end_date": "Order end date in YYYYMMDD format (e.g., 20250820)",
+                "approval_start": "Test approval start date in YYYYMMDD format (e.g., 20250819)",
+                "approval_end": "Test approval end date in YYYYMMDD format (e.g., 20250820)",
+                "sender_codes": "Comma-separated sender codes (e.g., 1030, 10334, 12421)",
+                "test_code": "Test code to filter by (e.g., 130001090)",
+                "collection_place": "Collection place code (e.g., 19)",
+                "dob_start": "Patient date of birth start in YYYYMMDD format (e.g., 20250523)",
+                "dob_end": "Patient date of birth end in YYYYMMDD format (e.g., 20250820)"
+            }
+        },
+        {
+            "query": "SELECT ao.*,ar.*,i.* FROM ao(NOLOCK),ar(NOLOCK),i(NOLOCK),asa(NOLOCK) WHERE arordno=aoordno AND ardate=aodate AND aopatcode=icode AND ar.ardate=asa.asadate AND ar.arordno=asa.asaordno AND ar.artubenum=asa.asatubenum AND ao.aodate>={start_date} AND ao.aodate<={end_date} AND ar.arappdate>={approval_start} AND ar.arappdate<={approval_end} AND ao.aosndcod in ({sender_codes}) AND ar.arisreject=0 AND ar.artest={test_code} AND asa.asacollplace={collection_place} AND EXISTS (SELECT * FROM ms(NOLOCK) WHERE ar.arinst=ms.msmachine AND ms.mssite={site_code}) ORDER BY ao.aodate ASC,ao.aoordno ASC",
+            "description": "Advanced query with machine site validation, joining orders, tests, patients, and samples with comprehensive filtering including machine site verification",
+            "parameters": {
+                "start_date": "Order start date in YYYYMMDD format (e.g., 20250708)",
+                "end_date": "Order end date in YYYYMMDD format (e.g., 20250820)",
+                "approval_start": "Test approval start date in YYYYMMDD format (e.g., 20250819)",
+                "approval_end": "Test approval end date in YYYYMMDD format (e.g., 20250820)",
+                "sender_codes": "Comma-separated sender codes (e.g., 1030, 10334, 12421)",
+                "test_code": "Test code to filter by (e.g., 130008130)",
+                "collection_place": "Collection place code (e.g., 681)",
+                "site_code": "Machine site code for validation (e.g., 3)"
+            }
+        },
+        {
+            "query": "SELECT * FROM asa(NOLOCK) WHERE asa.asapatcode={patient_code} AND asa.asadate BETWEEN {start_date} AND {end_date} ORDER BY asa.asadate ASC, asa.asatime ASC",
+            "description": "Retrieve patient samples within a date range, ordered chronologically",
+            "parameters": {
+                "patient_code": "Patient code (e.g., 12345)",
+                "start_date": "Start date in YYYYMMDD format (e.g., 20240101)",
+                "end_date": "End date in YYYYMMDD format (e.g., 20241231)"
+            }
+        },
+        {
+            "query": "SELECT * FROM asa(NOLOCK) WHERE asa.asacollplace={collection_place} AND asa.asadate={sample_date} AND asa.asacollector={collector_code}",
+            "description": "Retrieve samples by collection place, date, and collector for workflow analysis",
+            "parameters": {
+                "collection_place": "Collection place code (e.g., 19)",
+                "sample_date": "Sample date in YYYYMMDD format (e.g., 20250820)",
+                "collector_code": "Collector/phlebotomist code (e.g., 101)"
+            }
+        }
+    ],
+    "Indexes": {
+        "INDEX0_UNQ_ASA": "clustered, unique located on PRIMARY (asaordno, asadate, asatubenum)",
+        "INDEX1_ASA": "nonclustered located on PRIMARY (asapatcode, asadate)",
+        "INDEX2_ASA": "nonclustered located on PRIMARY (asalabel, asaordno)",
+        "INDEX_FORMATED_ASA": "nonclustered located on PRIMARY (asaformattedlabel, asaordno)"
+    }
+}

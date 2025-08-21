@@ -1,0 +1,90 @@
+{
+    "table": "cti",
+    "display_name": "Tests Times",
+    "alias": "cti",
+    "description": "Tests Execution Times",
+    "fields": {
+        "ctiaction": "action to be performed after calculating test time (int)",
+        "ctiallevel": "Alert Priority (smallint)",
+        "ctialtype": "Alert Type (smallint)",
+        "cticode": "Test Code (int)",
+        "ctientity": "the entity that the definition refers to (tinyint)",
+        "ctifrom": "from what test stage to be calculated by TestTimer (smallint)",
+        "ctikey": "cti key (int)",
+        "ctiperformsite": "cti can be define per performing site (int)",
+        "ctiresult": "REMOVED FROM CODE IN CL# 104306 IMA# 262001 (nvarchar)",
+        "ctistage": "Not Active (smallint)",
+        "ctistrkey": "REMOVED FROM CODE IN CL# 104307 IMA# 232001 (nvarchar)",
+        "ctitime": "Test Time (int)",
+        "ctito": "until what test stage to be calculated by TestTimer (smallint)",
+        "ctitype": "test time type (smallint)",
+        "ctiunits": "Units Of Time (tinyint)",
+        "ctiurglevel": "Urgency (tinyint)",
+        "lastupdate": "last setup update (int)"
+    },
+    "joins": {
+        "c": "cti.cticode = c.ccode"
+    },
+    "examples": [
+        {
+            "query": "SELECT * FROM cti(NOLOCK) WHERE cti.cticode={test_code} AND cti.ctientity={entity_type} AND cti.ctiurglevel={urgency_level} AND cti.ctitype<={max_time_type} AND cti.ctiperformsite in ({performing_sites}) ORDER BY cti.ctitype ASC,cti.ctiurglevel DESC,cti.ctiperformsite DESC",
+            "description": "Retrieve test time definitions with complex filtering by entity, urgency, time type range, and performing sites, ordered by priority",
+            "parameters": {
+                "test_code": "Test code (e.g., 10906676)",
+                "entity_type": "Entity type identifier (e.g., 52)",
+                "urgency_level": "Urgency level (e.g., 0 for normal)",
+                "max_time_type": "Maximum time type to include (e.g., 100)",
+                "performing_sites": "Comma-separated performing site codes (e.g., 8, 0)"
+            }
+        },
+        {
+            "query": "SELECT * FROM cti(NOLOCK) WHERE cti.cticode={test_code} AND cti.ctientity={entity_type} AND cti.ctitype={time_type} AND cti.ctiurglevel={urgency_level} AND cti.ctiperformsite in ({performing_sites})",
+            "description": "Retrieve specific test time definition by test code, entity, time type, urgency level, and performing sites",
+            "parameters": {
+                "test_code": "Test code (e.g., 1877)",
+                "entity_type": "Entity type identifier (e.g., 52)",
+                "time_type": "Test time type (e.g., 1)",
+                "urgency_level": "Urgency level (e.g., 1 for urgent)",
+                "performing_sites": "Comma-separated performing site codes (e.g., 3, 0)"
+            }
+        },
+        {
+            "query": "SELECT * FROM cti(NOLOCK) WHERE cti.cticode={test_code} AND cti.ctientity={entity_type}",
+            "description": "Retrieve all test time definitions for a specific test code and entity type",
+            "parameters": {
+                "test_code": "Test code (e.g., 904059)",
+                "entity_type": "Entity type identifier (e.g., 52)"
+            }
+        },
+        {
+            "query": "SELECT * FROM cti(NOLOCK) WHERE cti.ctiperformsite={performing_site} AND cti.ctiurglevel={urgency_level} ORDER BY cti.ctitime ASC",
+            "description": "Retrieve test time definitions by performing site and urgency level, ordered by execution time",
+            "parameters": {
+                "performing_site": "Performing site code (e.g., 8)",
+                "urgency_level": "Urgency level (e.g., 0)"
+            }
+        },
+        {
+            "query": "SELECT * FROM cti(NOLOCK) WHERE cti.ctitype={time_type} AND cti.ctientity={entity_type} AND cti.ctitime>={min_time}",
+            "description": "Retrieve test time definitions by time type and entity with minimum execution time threshold",
+            "parameters": {
+                "time_type": "Test time type (e.g., 1)",
+                "entity_type": "Entity type identifier (e.g., 52)",
+                "min_time": "Minimum execution time (e.g., 60)"
+            }
+        },
+        {
+            "query": "SELECT * FROM cti(NOLOCK) WHERE cti.cticode={test_code} AND cti.ctiurglevel BETWEEN {min_urgency} AND {max_urgency} ORDER BY cti.ctiurglevel ASC",
+            "description": "Retrieve test time definitions within urgency level range for a specific test, ordered by urgency",
+            "parameters": {
+                "test_code": "Test code (e.g., 10906676)",
+                "min_urgency": "Minimum urgency level (e.g., 0)",
+                "max_urgency": "Maximum urgency level (e.g., 2)"
+            }
+        }
+    ],
+    "Indexes": {
+        "INDEX0_UNQ_CTI": "nonclustered, unique located on PRIMARY (ctikey)",
+        "INDEX1_UNQ_CTI": "nonclustered, unique located on PRIMARY (cticode, ctiurglevel, ctitype, ctifrom, ctito, ctiperformsite)"
+    }
+}

@@ -1,0 +1,166 @@
+{
+    "table": "sa",
+    "display_name": "Samples",
+    "alias": "sa",
+    "description": "Samples In Current",
+    "fields": {
+        "sacolldate": "Collection Date (int)",
+        "sacollector": "The Collector (Phlebotomist) (smallint)",
+        "sacollplace": "Collection Place (int)",
+        "sacolltime": "Collection Time (smallint)",
+        "sacommconst": "Count Of Const Remarks For Sample (smallint)",
+        "sacommfree": "Count Of Free Remarks For Sample (smallint)",
+        "sacurrsite": "Keeps the sample current site (int)",
+        "sadate": "Sample Date (int)",
+        "sadatein": "Date of reciept confiramtion in the lab (int)",
+        "sadetails": "Not Active (int)",
+        "sadur": "Duration For Collection (smallint)",
+        "sadynamictime": "Dynamic Time When Sampled By Dynamic Time (smallint)",
+        "saformattedlabel": "This field will hold the formatted accession(alphanumeric ) includes the prefix. (nvarchar)",
+        "sainprof": "Profile Related by the Sample (pathology) (int)",
+        "saisgen": "is genetic sample (smallint)",
+        "salab": "Lab Code (smallint)",
+        "salabel": "Sample Label (External) (int)",
+        "salabelingscheme": "No Documentation for this Field (int)",
+        "salabperformsite": "No Documentation for this Field (int)",
+        "salaststatus": "Not Active (smallint)",
+        "salicense": "Doctor code (int)",
+        "samainproctestnum": "No Documentation for this Field (smallint)",
+        "sanextsite": "Keeps the sample next site (int)",
+        "sanotreceived": "was the sample not received in the lab (0= received. 1= not received. 2= temporarily received - used for deferred samples) (tinyint)",
+        "saordno": "Sample Number (Internal) (int)",
+        "saorigtest": "Not Active (int)",
+        "saorigtube": "Not Active (int)",
+        "saparameter": "Parameter For Sampling (By \"Csampling\" In Table C) (smallint)",
+        "sapatcode": "Patient Code (int)",
+        "saperformsite": "Performing Site Of Sample (int)",
+        "saphysicalstatus": "No Documentation for this Field (smallint)",
+        "saprint": "Sample was already printed (used for sampling report) (tinyint)",
+        "sapriority": "The priority of the sample (tinyint)",
+        "saprocedure": "Procedure Relate to the Sample (Pathology) (nvarchar)",
+        "saproctestnum": "pathology/genetics procedure's test numbers seperated by pipeline. This is filled for workitems (nvarchar)",
+        "saquantity": "Quantity (real)",
+        "sareceiveddate": "Received date (int)",
+        "sareceivedtime": "Received time (smallint)",
+        "sareusedate": "No Documentation for this Field (int)",
+        "sareuseordno": "No Documentation for this Field (int)",
+        "sareusetubenum": "No Documentation for this Field (smallint)",
+        "sashipment": "Shipment number (int)",
+        "sasmplvl": "Not Active (smallint)",
+        "sasndcode": "Facility code (int)",
+        "sasource": "Not Active (tinyint)",
+        "sastation": "Analyzer's Code When Sampling By Station (smallint)",
+        "sastatus": "Sample status (see psastatus in psa table for details) (smallint)",
+        "sastatusdate": "Date in which the status was updated last time (int)",
+        "sastatustime": "Time in which the status was updated last time (smallint)",
+        "sastatususer": "Not Active (smallint)",
+        "sasublabel": "Sub Label For Pathology Sample (int)",
+        "sasubst": "Substence Of Sample (smallint)",
+        "sasuspect": "Is Patient Suspected For HIV (smallint)",
+        "satime": "Sample Time (smallint)",
+        "satimein": "Time of reciept confiramtion in the lab (smallint)",
+        "satubenum": "Sample Number (internal) In The Whole Order (smallint)",
+        "satubetype": "Tube type of the sample (for sampling by tube type) (smallint)",
+        "satype": "Not Active (smallint)",
+        "satz": "Patient tz (nvarchar)",
+        "saurgent": "Is this Sample Urgent? (tinyint)",
+        "savol": "Volume For Sample (real)"
+    },
+    "joins": {
+        "c": "sa.saparameter = c.csampling"
+    },
+    "examples": [
+        {
+            "query": "SELECT r.* FROM r(NOLOCK) join sa(NOLOCK) on r.rdate=sa.sadate AND r.rordno=sa.saordno AND r.rtubenum=sa.satubenum join o(NOLOCK) on r.rdate=o.odate AND r.rordno=o.oordno WHERE sa.sanotreceived=0 AND r.rlab={lab_code} AND r.rstatus>={min_status} AND r.rstatus<={max_status} AND r.rtest in ({test_codes}) AND r.risprofile=0 AND r.rtray={tray_code} AND o.osite={site_code} AND r.rinst in ({machine_codes}) AND o.otype<>{excluded_type} AND r.rdate={test_date} AND r.rordno={order_number} AND r.rtubenum={tube_number} ORDER BY r.rdate ASC,r.rordno ASC,r.rtubenum ASC",
+            "description": "Complex multi-table join retrieving test results with samples and orders, filtering by lab, status range, test codes, machines, and specific sample criteria",
+            "parameters": {
+                "lab_code": "Laboratory code (e.g., 25)",
+                "min_status": "Minimum test status (e.g., 1)",
+                "max_status": "Maximum test status (e.g., 1699)",
+                "test_codes": "Comma-separated test codes (e.g., 904627, 906371, 907300)",
+                "tray_code": "Tray code (e.g., 0)",
+                "site_code": "Site code (e.g., 1)",
+                "machine_codes": "Comma-separated machine codes (e.g., 1500, 1510, 1520)",
+                "excluded_type": "Order type to exclude (e.g., 2)",
+                "test_date": "Test date in YYYYMMDD format (e.g., 20250815)",
+                "order_number": "Order number (e.g., 115938358)",
+                "tube_number": "Tube number (e.g., 8)"
+            }
+        },
+        {
+            "query": "SELECT * FROM sa(NOLOCK) WHERE sa.sadate={sample_date} AND sa.saordno={order_number} AND sa.satubenum={tube_number}",
+            "description": "Retrieve specific sample by date, order number, and tube number",
+            "parameters": {
+                "sample_date": "Sample date in YYYYMMDD format (e.g., 20250816)",
+                "order_number": "Order number (e.g., 115971052)",
+                "tube_number": "Tube number (e.g., 1)"
+            }
+        },
+        {
+            "query": "SELECT r.* FROM r(NOLOCK) join sa(NOLOCK) on r.rdate=sa.sadate AND r.rordno=sa.saordno AND r.rtubenum=sa.satubenum join o(NOLOCK) on r.rdate=o.odate AND r.rordno=o.oordno WHERE sa.sanotreceived=0 AND r.rlab={lab_code} AND r.rtest={test_code} AND r.risprofile=0 AND o.osite={site_code} AND o.otype<>{excluded_type} AND r.rdate={test_date} AND r.rordno={order_number} AND r.rtubenum={tube_number} ORDER BY r.rdate ASC,sa.saformattedlabel ASC,r.rordno ASC,r.rtubenum ASC",
+            "description": "Retrieve test results with samples and orders for specific test code, ordered by date, formatted label, order, and tube",
+            "parameters": {
+                "lab_code": "Laboratory code (e.g., 10)",
+                "test_code": "Test code (e.g., 9219)",
+                "site_code": "Site code (e.g., 1)",
+                "excluded_type": "Order type to exclude (e.g., 2)",
+                "test_date": "Test date in YYYYMMDD format (e.g., 20250820)",
+                "order_number": "Order number (e.g., 116038876)",
+                "tube_number": "Tube number (e.g., 6)"
+            }
+        },
+        {
+            "query": "SELECT * FROM sa(NOLOCK) WHERE sa.sapatcode={patient_code} AND sa.sadate BETWEEN {start_date} AND {end_date} ORDER BY sa.sadate DESC, sa.satime DESC",
+            "description": "Retrieve patient samples within a date range, ordered by most recent first",
+            "parameters": {
+                "patient_code": "Patient code (e.g., 12345)",
+                "start_date": "Start date in YYYYMMDD format (e.g., 20240101)",
+                "end_date": "End date in YYYYMMDD format (e.g., 20241231)"
+            }
+        },
+        {
+            "query": "SELECT * FROM sa(NOLOCK) WHERE sa.sanotreceived={received_status} AND sa.sadate={sample_date} AND sa.sastatus BETWEEN {min_status} AND {max_status}",
+            "description": "Retrieve samples by receipt status for a specific date within a status range",
+            "parameters": {
+                "received_status": "Receipt status (0=received, 1=not received, 2=temporarily received) (e.g., 0)",
+                "sample_date": "Sample date in YYYYMMDD format (e.g., 20250820)",
+                "min_status": "Minimum sample status (e.g., 100)",
+                "max_status": "Maximum sample status (e.g., 599)"
+            }
+        },
+        {
+            "query": "SELECT * FROM sa(NOLOCK) WHERE sa.sacollplace={collection_place} AND sa.sadate={sample_date} AND sa.sacollector={collector_code} ORDER BY sa.sacolltime ASC",
+            "description": "Retrieve samples by collection place, date, and collector, ordered by collection time",
+            "parameters": {
+                "collection_place": "Collection place code (e.g., 100)",
+                "sample_date": "Sample date in YYYYMMDD format (e.g., 20250820)",
+                "collector_code": "Collector/phlebotomist code (e.g., 101)"
+            }
+        },
+        {
+            "query": "SELECT * FROM sa(NOLOCK) WHERE sa.saurgent=1 AND sa.sadate={sample_date} AND sa.sastatus<>{excluded_status} ORDER BY sa.sacolltime ASC",
+            "description": "Retrieve urgent samples for a specific date, excluding certain statuses, ordered by collection time",
+            "parameters": {
+                "sample_date": "Sample date in YYYYMMDD format (e.g., 20250820)",
+                "excluded_status": "Status to exclude (e.g., 999)"
+            }
+        },
+        {
+            "query": "SELECT * FROM sa(NOLOCK) WHERE sa.saformattedlabel={formatted_label} OR sa.salabel={label}",
+            "description": "Retrieve sample by formatted label or numeric label",
+            "parameters": {
+                "formatted_label": "Formatted sample label (e.g., 'NL116096877')",
+                "label": "Numeric sample label (e.g., 116096877)"
+            }
+        }
+    ],
+    "Indexes": {
+        "INDEX0_UNQ_SA": "clustered, unique located on PRIMARY (saordno, sadate, satubenum)",
+        "INDEX1_SA": "nonclustered located on PRIMARY (salabel, sadate)",
+        "INDEX2_SA": "nonclustered located on PRIMARY (sapatcode, sadate)",
+        "INDEX5_SA": "nonclustered located on PRIMARY (sanextsite, satype, sastatus, sadate)",
+        "INDEX3_SA": "nonclustered located on PRIMARY (sadate, sadetails, satype)",
+        "INDEX4_SA": "nonclustered located on PRIMARY (sanotreceived)",
+        "INDEX_FORMATED_SA": "nonclustered located on PRIMARY (saformattedlabel, saordno)"
+    }
+}

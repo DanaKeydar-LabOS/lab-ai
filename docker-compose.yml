@@ -1,0 +1,88 @@
+version: '3.8'
+
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: lab-qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"  # gRPC port
+    volumes:
+      - qdrant_storage:/qdrant/storage
+    environment:
+      - QDRANT__SERVICE__HTTP_PORT=6333
+      - QDRANT__SERVICE__GRPC_PORT=6334
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: lab-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_models:/root/.ollama
+    environment:
+      - OLLAMA_KEEP_ALIVE=24h
+      - OLLAMA_HOST=0.0.0.0
+    restart: unless-stopped
+    
+    # Uncomment if you have NVIDIA GPU support
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: lab-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./kb:/app/kb:ro
+      - ./logs:/app/logs
+    environment:
+      # Qdrant Configuration
+      - QDRANT_HOST=qdrant
+      - QDRANT_PORT=6333
+      
+      # Ollama Configuration  
+      - OLLAMA_HOST=ollama
+      - OLLAMA_PORT=11434
+      
+      # Model Configuration
+      - EMBEDDING_MODEL=nomic-embed-text
+      #- CHAT_MODEL=llama3.2
+      - CHAT_MODEL=mistral
+
+      # Database Configuration (update with your values)
+      - LAB_DB_HOST=your_db_host
+      - LAB_DB_PORT=5432
+      - LAB_DB_NAME=your_db_name
+      - LAB_DB_USER=your_db_user
+      - LAB_DB_PASSWORD=your_db_password
+      - LAB_DB_DRIVER=postgresql
+      
+      # API Configuration
+      - LOG_LEVEL=INFO
+      - MAX_QUERY_LIMIT=1000
+      - DEFAULT_QUERY_LIMIT=100
+      - CACHE_TTL_SECONDS=300
+      - CACHE_MAX_SIZE=50
+    
+    depends_on:
+      - qdrant
+      - ollama
+    restart: unless-stopped
+
+volumes:
+  qdrant_storage:
+  ollama_models:
+
+networks:
+  default:
+    name: lab-rag-network

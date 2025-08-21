@@ -1,0 +1,83 @@
+{
+    "table": "ep",
+    "display_name": "Episodes",
+    "alias": "ep",
+    "description": "Episodes (Current)",
+    "fields": {
+        "epclosedate": "Episode Closing Date (int)",
+        "epclosetime": "Episode Closing Time (smallint)",
+        "epcode": "Episode Number (External) (nvarchar)",
+        "epcommconst": "Count Of Const Comments For The Episode (smallint)",
+        "epcommfree": "Count Of Free Comments For The Episode (smallint)",
+        "epdate": "Episode Opening Date (int)",
+        "epextfield1": "pre-scheduling episode sender (int)",
+        "epextfield2": "pre-scheduling episode doctor (int)",
+        "epextfield3": "pre-scheduling episode phlebotomist (int)",
+        "epid": "Patient Id If The Episode Related To Patient (nvarchar)",
+        "epnumber": "Episode Number (Internal For The System) (int)",
+        "eppatcode": "Patient Code (int)",
+        "epsite": "episode related site (int)",
+        "eptime": "Episode Opening Time (smallint)",
+        "eptype": "Episode Type (smallint)"
+    },
+    "joins": {
+        "i": "ep.eppatcode = i.icode"
+    },
+    "examples": [
+        {
+            "query": "SELECT * FROM ep(NOLOCK) WHERE ep.eptype<>{excluded_type} AND EXISTS (SELECT * FROM epc(NOLOCK) WHERE ep.eptype=epc.epctype AND ep.epcode=epc.epccode AND epc.epcdate={episode_date} AND epc.epcorder={order_number}) ORDER BY ep.epdate ASC,ep.eptime ASC",
+            "description": "Retrieve current episodes excluding specific type that exist in episode collection table for a given date and order, sorted chronologically",
+            "parameters": {
+                "excluded_type": "Episode type to exclude (e.g., 12)",
+                "episode_date": "Episode date in YYYYMMDD format (e.g., 20250820)",
+                "order_number": "Order number (e.g., 116113504)"
+            }
+        },
+        {
+            "query": "SELECT * FROM ep(NOLOCK) WHERE ep.eppatcode={patient_code} AND ep.epdate BETWEEN {start_date} AND {end_date} ORDER BY ep.epdate DESC, ep.eptime DESC",
+            "description": "Retrieve patient episodes within a date range, ordered by most recent first",
+            "parameters": {
+                "patient_code": "Patient code (e.g., 12345)",
+                "start_date": "Start date in YYYYMMDD format (e.g., 20240101)",
+                "end_date": "End date in YYYYMMDD format (e.g., 20241231)"
+            }
+        },
+        {
+            "query": "SELECT * FROM ep(NOLOCK) WHERE ep.eptype={episode_type} AND ep.epdate={episode_date} ORDER BY ep.eptime ASC",
+            "description": "Retrieve episodes by type for a specific date, ordered by opening time",
+            "parameters": {
+                "episode_type": "Episode type (e.g., 1)",
+                "episode_date": "Episode date in YYYYMMDD format (e.g., 20250820)"
+            }
+        },
+        {
+            "query": "SELECT * FROM ep(NOLOCK) WHERE ep.epsite={site_code} AND ep.epdate={episode_date} AND ep.eptype<>{excluded_type}",
+            "description": "Retrieve episodes by site for a specific date, excluding certain episode types",
+            "parameters": {
+                "site_code": "Site code (e.g., 1)",
+                "episode_date": "Episode date in YYYYMMDD format (e.g., 20250820)",
+                "excluded_type": "Episode type to exclude (e.g., 12)"
+            }
+        },
+        {
+            "query": "SELECT * FROM ep(NOLOCK) WHERE ep.epcode={episode_code} AND ep.eptype={episode_type}",
+            "description": "Retrieve specific episode by external episode code and type",
+            "parameters": {
+                "episode_code": "External episode code (e.g., 'EP001')",
+                "episode_type": "Episode type (e.g., 1)"
+            }
+        },
+        {
+            "query": "SELECT * FROM ep(NOLOCK) WHERE ep.epextfield1={sender_code} AND ep.epdate={episode_date}",
+            "description": "Retrieve episodes by pre-scheduling sender for a specific date",
+            "parameters": {
+                "sender_code": "Pre-scheduling episode sender code (e.g., 100)",
+                "episode_date": "Episode date in YYYYMMDD format (e.g., 20250820)"
+            }
+        }
+    ],
+    "Indexes": {
+        "INDEX0_UNQ_EP": "nonclustered, unique located on PRIMARY (eptype, epcode)",
+        "INDEX1_EP": "nonclustered located on PRIMARY (eppatcode, eptype, epnumber)"
+    }
+}

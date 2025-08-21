@@ -1,0 +1,111 @@
+{
+    "table": "rr",
+    "display_name": "Runs",
+    "alias": "rr",
+    "description": "Runs In Current",
+    "fields": {
+        "rrdate": "Run Date (Insert Date) (int)",
+        "rrdilution": "Dilution For Run (real)",
+        "rrexecdate": "Execution Date (Execution Date In The Analyzer) (int)",
+        "rrexectime": "Execution Time (Execution Time In The Analyzer) (smallint)",
+        "rrindate": "Insert Date To Autolab (int)",
+        "rrinst": "Analyzer's Code For This Run (smallint)",
+        "rrintime": "Insert Time To Autolab (smallint)",
+        "rrlabel": "Run Label (External) (int)",
+        "rrlocation": "Location In Tray (smallint)",
+        "rrmaterial": "Not Active (int)",
+        "rrmic": "mic results - micro (nvarchar)",
+        "rrnumber": "Run Number (Internal For The Test) (smallint)",
+        "rrorig": "Original Run Result (nvarchar)",
+        "rrqcstatus": "Status Qc For Run (tinyint)",
+        "rrresult": "Run Result (Original Or After Process) (nvarchar)",
+        "rrstatus": "Run Status (smallint)",
+        "rrtest": "Test Code (int)",
+        "rrtestnum": "Test Number In R Of The Test (smallint)",
+        "rrtray": "Tray Number (int)",
+        "rrtrayname": "Tray Name Which The Analyzer Returned (nvarchar)",
+        "rruser": "User Code Of The User That Gave The Result (smallint)",
+        "rruserpoint1": "Not Active (int)",
+        "rruserpoint2": "Not Active (int)",
+        "rruserpoint3": "Not Active (int)"
+    },
+    "joins": {
+        "r": [
+            "rr.rrlabel = r.rlabel",
+            "rr.rrtest = r.rtest"
+        ]
+    },
+    "examples": [
+        {
+            "query": "SELECT * FROM rr(NOLOCK) WHERE rr.rrdate={run_date} AND rr.rrlabel={label} ORDER BY rr.rrtestnum ASC,rr.rrnumber DESC",
+            "description": "Retrieve all runs for a specific date and label, ordered by test number ascending and run number descending",
+            "parameters": {
+                "run_date": "Run date in YYYYMMDD format (e.g., 20250820)",
+                "label": "Run label (external) (e.g., 116050849)"
+            }
+        },
+        {
+            "query": "SELECT * FROM rr(NOLOCK) WHERE rr.rrdate={run_date} AND rr.rrlabel={label} AND rr.rrtestnum={test_number} AND ((rr.rrstatus>={min_status} AND rr.rrstatus<>{excluded_status}) OR (rr.rrstatus={specific_status} AND rr.rrnumber={run_number})) ORDER BY rr.rrnumber DESC",
+            "description": "Retrieve runs with complex status filtering, including specific status conditions and run number criteria",
+            "parameters": {
+                "run_date": "Run date in YYYYMMDD format (e.g., 20250819)",
+                "label": "Run label (external) (e.g., 115983296)",
+                "test_number": "Test number in request table (e.g., 2)",
+                "min_status": "Minimum status threshold (e.g., 3)",
+                "excluded_status": "Status to exclude (e.g., 5)",
+                "specific_status": "Specific status for alternate condition (e.g., 1)",
+                "run_number": "Run number for specific status condition (e.g., 1)"
+            }
+        },
+        {
+            "query": "SELECT * FROM rr(NOLOCK) WHERE rr.rrinst={analyzer_code} AND rr.rrdate={run_date} ORDER BY rr.rrexectime ASC",
+            "description": "Retrieve runs by analyzer code for a specific date, ordered by execution time",
+            "parameters": {
+                "analyzer_code": "Analyzer code (e.g., 101)",
+                "run_date": "Run date in YYYYMMDD format (e.g., 20250820)"
+            }
+        },
+        {
+            "query": "SELECT * FROM rr(NOLOCK) WHERE rr.rrdate BETWEEN {start_date} AND {end_date} AND rr.rrtest={test_code} AND rr.rrstatus={status_code}",
+            "description": "Retrieve runs within a date range for specific test code and status",
+            "parameters": {
+                "start_date": "Start date in YYYYMMDD format (e.g., 20240101)",
+                "end_date": "End date in YYYYMMDD format (e.g., 20241231)",
+                "test_code": "Test code (e.g., 12345)",
+                "status_code": "Run status code (e.g., 3)"
+            }
+        },
+        {
+            "query": "SELECT * FROM rr(NOLOCK) WHERE rr.rrtray={tray_number} AND rr.rrdate={run_date} ORDER BY rr.rrlocation ASC",
+            "description": "Retrieve runs by tray number for a specific date, ordered by location in tray",
+            "parameters": {
+                "tray_number": "Tray number (e.g., 1)",
+                "run_date": "Run date in YYYYMMDD format (e.g., 20250820)"
+            }
+        },
+        {
+            "query": "SELECT * FROM rr(NOLOCK) WHERE rr.rrqcstatus={qc_status} AND rr.rrdate={run_date} AND rr.rrinst={analyzer_code}",
+            "description": "Retrieve runs by QC status for specific date and analyzer, useful for quality control monitoring",
+            "parameters": {
+                "qc_status": "QC status code (e.g., 1)",
+                "run_date": "Run date in YYYYMMDD format (e.g., 20250820)",
+                "analyzer_code": "Analyzer code (e.g., 101)"
+            }
+        },
+        {
+            "query": "SELECT * FROM rr(NOLOCK) WHERE rr.rrlabel={label} AND rr.rrtestnum={test_number} AND rr.rrdate={run_date} ORDER BY rr.rrnumber ASC",
+            "description": "Retrieve all run iterations for a specific label and test number, ordered by run number",
+            "parameters": {
+                "label": "Run label (external) (e.g., 116050849)",
+                "test_number": "Test number in request table (e.g., 2)",
+                "run_date": "Run date in YYYYMMDD format (e.g., 20250820)"
+            }
+        }
+    ],
+    "Indexes": {
+        "INDEX0_UNQ_RR": "nonclustered, unique located on PRIMARY (rrlabel, rrtestnum, rrdate, rrnumber)",
+        "INDEX1_RR": "nonclustered located on PRIMARY (rrtray, rrlocation)",
+        "INDEX2_RR": "nonclustered located on PRIMARY (rrdate, rrlabel)",
+        "INDEX3_RR": "nonclustered located on PRIMARY (rrdate, rrlabel, rrtestnum, rrnumber(-))"
+    }
+}

@@ -1,0 +1,94 @@
+{
+    "table": "arr",
+    "display_name": "Archived Runs",
+    "alias": "arr",
+    "description": "Runs In Archive",
+    "fields": {
+        "rrdate": "Run Date (Insert Date) (int)",
+        "rrdilution": "Dilution For Run (real)",
+        "rrexecdate": "Execution Date (Execution Date In The Analyzer) (int)",
+        "rrexectime": "Execution Time (Execution Time In The Analyzer) (smallint)",
+        "rrindate": "Insert Date To Autolab (int)",
+        "rrinst": "Analyzer's Code For This Run (smallint)",
+        "rrintime": "Insert Time To Autolab (smallint)",
+        "rrlabel": "Run Label (External) (int)",
+        "rrlocation": "Location In Tray (smallint)",
+        "rrmaterial": "Not Active (int)",
+        "rrmic": "mic results - micro (nvarchar)",
+        "rrnumber": "Run Number (Internal For The Test) (smallint)",
+        "rrorig": "Original Run Result (nvarchar)",
+        "rrqcstatus": "Status Qc For Run (tinyint)",
+        "rrresult": "Run Result (Original Or After Process) (nvarchar)",
+        "rrstatus": "Run Status (smallint)",
+        "rrtest": "Test Code (int)",
+        "rrtestnum": "Test Number In AR Of The Test (smallint)",
+        "rrtray": "Tray Number (int)",
+        "rrtrayname": "Tray Name Which The Analyzer Returned (nvarchar)",
+        "rruser": "User Code Of The User That Gave The Result (smallint)",
+        "rruserpoint1": "Not Active (int)",
+        "rruserpoint2": "Not Active (int)",
+        "rruserpoint3": "Not Active (int)"
+    },
+    "joins": {
+        "ar": [
+            "arr.rrnumber = ar.aractiverun",
+            "arr.rrdate = ar.ardate",
+            "arr.rrlabel = ar.arlabel",
+            "arr.rrtest = ar.artest",
+            "arr.rrtestnum = ar.artestnum"
+        ]
+    },
+    "examples": [
+        {
+            "query": "SELECT * FROM arr(NOLOCK) WHERE arr.rrdate={run_date} AND arr.rrlabel={label} AND arr.rrtestnum={test_number} AND arr.rrnumber={run_number}",
+            "description": "Retrieve a specific archived run by date, label, test number, and run number",
+            "parameters": {
+                "run_date": "Run date in YYYYMMDD format (e.g., 20250812)",
+                "label": "Run label (external) (e.g., 115834536)",
+                "test_number": "Test number in AR table (e.g., 8)",
+                "run_number": "Internal run number for the test (e.g., 1)"
+            }
+        },
+        {
+            "query": "SELECT * FROM arr(NOLOCK) WHERE arr.rrdate={run_date} AND arr.rrlabel={label} ORDER BY arr.rrtestnum ASC, arr.rrnumber DESC",
+            "description": "Retrieve all runs for a specific date and label, ordered by test number ascending and run number descending",
+            "parameters": {
+                "run_date": "Run date in YYYYMMDD format (e.g., 20250729)",
+                "label": "Run label (external) (e.g., 115353122)"
+            }
+        },
+        {
+            "query": "SELECT * FROM arr(NOLOCK) WHERE arr.rrdate BETWEEN {start_date} AND {end_date} AND arr.rrtest={test_code} AND arr.rrstatus={status}",
+            "description": "Retrieve archived runs within a date range for a specific test code and status",
+            "parameters": {
+                "start_date": "Start date in YYYYMMDD format (e.g., 20240101)",
+                "end_date": "End date in YYYYMMDD format (e.g., 20241231)",
+                "test_code": "Test code (e.g., 12345)",
+                "status": "Run status code (e.g., 1)"
+            }
+        },
+        {
+            "query": "SELECT * FROM arr(NOLOCK) WHERE arr.rrinst={analyzer_code} AND arr.rrdate={run_date} ORDER BY arr.rrexectime ASC",
+            "description": "Retrieve runs by analyzer code for a specific date, ordered by execution time",
+            "parameters": {
+                "analyzer_code": "Analyzer code (e.g., 101)",
+                "run_date": "Run date in YYYYMMDD format (e.g., 20250812)"
+            }
+        },
+        {
+            "query": "SELECT * FROM arr(NOLOCK) WHERE arr.rrdate={run_date} AND arr.rrqcstatus={qc_status} AND arr.rrtest={test_code}",
+            "description": "Retrieve archived runs by date, QC status, and test code for quality control analysis",
+            "parameters": {
+                "run_date": "Run date in YYYYMMDD format (e.g., 20250812)",
+                "qc_status": "QC status code (e.g., 1)",
+                "test_code": "Test code (e.g., 60907231)"
+            }
+        }
+    ],
+    "Indexes": {
+        "INDEX0_UNQ_ARR": "clustered, unique located on PRIMARY (rrlabel, rrdate, rrnumber, rrtestnum)",
+        "INDEX1_ARR": "nonclustered located on PRIMARY (rrexecdate, rrdate, rrlabel, rrtestnum, rrnumber)",
+        "INDEX2_ARR": "nonclustered located on PRIMARY (rrdate, rrtest)",
+        "INDEX3_ARR": "nonclustered located on PRIMARY (rrdate, rrtest, rrstatus)"
+    }
+}

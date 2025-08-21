@@ -1,0 +1,112 @@
+{
+    "table": "mc",
+    "display_name": "Machine Connections",
+    "alias": "mc",
+    "description": "Machine and Test mapping",
+    "fields": {
+        "lastupdate": "last setup update (int)",
+        "mcchannel": "Channel of comunication in Analyzer (nvarchar)",
+        "mcdefault": "Is it the default communication channel to the analyzer ? (tinyint)",
+        "mcdsporder": "Order in moving to workbench screen (F6) (smallint)",
+        "mcemerg": "Is it the communication channel to the analyzer when the test marked as stat ? (tinyint)",
+        "mchigh": "Not Active (real)",
+        "mchourstoreset": "No Documentation for this Field (smallint)",
+        "mcinitcanapprove": "Does reset status prevent approve (tinyint)",
+        "mclow": "Not Active (real)",
+        "mcmaching": "Machine code (smallint)",
+        "mcmaterial": "Not Active (int)",
+        "mcname": "Alternative name of the channel in the analyzer (nvarchar)",
+        "mcnextqcresetdate": "next date to reset qc status (int)",
+        "mcnextqcresettime": "next time to reset qc status (smallint)",
+        "mcpriority": "No Documentation for this Field (smallint)",
+        "mcqcconfirm": "Automatic approve by Qc (tinyint)",
+        "mcqcformula": "No Documentation for this Field (int)",
+        "mcqcresetafterpass": "Whether to reset the analyte Qc status immediately after pass (tinyint)",
+        "mcqcstatus": "Qc status (tinyint)",
+        "mcqcstatusdate": "The last QCstatus change date (int)",
+        "mcqcstatusgroup": "No Documentation for this Field (smallint)",
+        "mcqcstatusrun": "No Documentation for this Field (int)",
+        "mcqcstatustime": "The last QCstatus change time (smallint)",
+        "mcqpuse": "Material quantity (real)",
+        "mcrequestlocalname": "No Documentation for this Field (nvarchar)",
+        "mcreturn": "Number of runs (int)",
+        "mcsentinfo": "Analyte additional info to be sent by the drivers (nvarchar)",
+        "mcsite": "No Documentation for this Field (int)",
+        "mctest": "Test code (int)"
+    },
+    "joins": {
+        "c": "mc.mctest = c.ccode"
+    },
+    "examples": [
+        {
+            "query": "SELECT * FROM mc(NOLOCK) WHERE mc.mcmaching={machine_code} AND mc.mctest={test_code} AND mc.mcsite={site_code}",
+            "description": "Retrieve specific machine-test connection mapping by machine code, test code, and site",
+            "parameters": {
+                "machine_code": "Machine code (e.g., 700)",
+                "test_code": "Test code (e.g., 702)",
+                "site_code": "Site code (e.g., 3)"
+            }
+        },
+        {
+            "query": "SELECT * FROM mc(NOLOCK) WHERE mc.mctest={test_code} AND mc.mcsite={site_code} AND mc.mcdefault=1",
+            "description": "Retrieve default machine connection for a specific test and site",
+            "parameters": {
+                "test_code": "Test code (e.g., 911295036)",
+                "site_code": "Site code (e.g., 3)"
+            }
+        },
+        {
+            "query": "SELECT COUNT(*) AS RET FROM r(NOLOCK) WHERE r.rdate={result_date} AND r.rordno={order_number} AND r.rtubenum={tube_number} AND EXISTS (SELECT * FROM mc(NOLOCK) WHERE r.rtest=mc.mctest AND mc.mcmaching={machine_code})",
+            "description": "Count test results with machine-test connection validation through EXISTS subquery",
+            "parameters": {
+                "result_date": "Result date in YYYYMMDD format (e.g., 20250820)",
+                "order_number": "Order number (e.g., 116112211)",
+                "tube_number": "Tube number (e.g., 5)",
+                "machine_code": "Machine code for validation (e.g., 10742)"
+            }
+        },
+        {
+            "query": "SELECT * FROM mc(NOLOCK) WHERE mc.mcmaching={machine_code} AND mc.mcsite={site_code} ORDER BY mc.mcdsporder ASC",
+            "description": "Retrieve all test connections for a specific machine and site, ordered by display order",
+            "parameters": {
+                "machine_code": "Machine code (e.g., 700)",
+                "site_code": "Site code (e.g., 3)"
+            }
+        },
+        {
+            "query": "SELECT * FROM mc(NOLOCK) WHERE mc.mctest={test_code} AND mc.mcemerg=1",
+            "description": "Retrieve emergency/stat communication channels for a specific test",
+            "parameters": {
+                "test_code": "Test code (e.g., 10001031)"
+            }
+        },
+        {
+            "query": "SELECT * FROM mc(NOLOCK) WHERE mc.mcqcstatus={qc_status} AND mc.mcsite={site_code}",
+            "description": "Retrieve machine connections by QC status for a specific site",
+            "parameters": {
+                "qc_status": "QC status (e.g., 1)",
+                "site_code": "Site code (e.g., 3)"
+            }
+        },
+        {
+            "query": "SELECT * FROM mc(NOLOCK) WHERE mc.mcmaching={machine_code} AND mc.mcqcconfirm=1 AND mc.mcsite={site_code}",
+            "description": "Retrieve machine connections with automatic QC approval for specific machine and site",
+            "parameters": {
+                "machine_code": "Machine code (e.g., 10407)",
+                "site_code": "Site code (e.g., 3)"
+            }
+        },
+        {
+            "query": "SELECT * FROM mc(NOLOCK) WHERE mc.mctest IN ({test_codes}) AND mc.mcsite={site_code} ORDER BY mc.mcmaching ASC, mc.mcdsporder ASC",
+            "description": "Retrieve machine connections for multiple tests at a specific site, ordered by machine and display order",
+            "parameters": {
+                "test_codes": "Comma-separated test codes (e.g., 702, 10001031, 911295036)",
+                "site_code": "Site code (e.g., 3)"
+            }
+        }
+    ],
+    "Indexes": {
+        "INDEX1_MC": "clustered located on PRIMARY (mcmaching, mctest)",
+        "INDEX0_UNQ_MC": "nonclustered, unique located on PRIMARY (mctest, mcmaching, mcsite)"
+    }
+}

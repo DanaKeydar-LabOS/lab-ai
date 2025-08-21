@@ -1,0 +1,36 @@
+{
+    "table": "tat",
+    "display_name": "Turn around time",
+    "alias": "tat",
+    "description": "Turn around time",
+    "fields": {
+        "tatapprove": "approval time (int)",
+        "tatcenterreceipt": "The calculated number of minutes passed between the order's creation time and the test's reception in a patient service center (int)",
+        "tatcoll": "collection time (int)",
+        "tatcount": "is counted (tinyint)",
+        "tatdate": "Date (int)",
+        "tatdist": "distribution time (int)",
+        "tatdistdate": "No Documentation for this Field (int)",
+        "tatentry": "entry time (int)",
+        "tatinst": "machine (smallint)",
+        "tatlab": "lab (smallint)",
+        "tatmicro": "is micro (smallint)",
+        "tatordno": "Ordno (int)",
+        "tatownersite": "Contains the order's owner site define in oownersite (Site Code) (int)",
+        "tatperformsite": "request performing site (int)",
+        "tatreceipt": "reception time (int)",
+        "tatresult": "result time (int)",
+        "tatsender": "sender (int)",
+        "tatsetuptime": "culture setup time (int)",
+        "tatshipped": "The calculated number of minutes passed between the order's creation time and the test's shipping time (int)",
+        "tatsite": "Site Code (int)",
+        "tattest": "test code (int)",
+        "tattestnum": "testnum (smallint)",
+        "taturgent": "is urgent (tinyint)"
+    },
+    "joins": {},
+    "examples": [],
+    "Indexes": {
+        "INDEX0_UNQ_TAT": "clustered, unique located on PRIMARY (tatdate, tatordno, tattestnum)"
+    }
+}

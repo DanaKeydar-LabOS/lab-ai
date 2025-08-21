@@ -1,0 +1,105 @@
+{
+    "table": "tat",
+    "display_name": "Turn around time",
+    "alias": "tat",
+    "description": "Turn around time",
+    "fields": {
+        "tatapprove": "approval time (int)",
+        "tatcenterreceipt": "The calculated number of minutes passed between the order's creation time and the test's reception in a patient service center (int)",
+        "tatcoll": "collection time (int)",
+        "tatcount": "is counted (tinyint)",
+        "tatdate": "Date (int)",
+        "tatdist": "distribution time (int)",
+        "tatdistdate": "No Documentation for this Field (int)",
+        "tatentry": "entry time (int)",
+        "tatinst": "machine (smallint)",
+        "tatlab": "lab (smallint)",
+        "tatmicro": "is micro (smallint)",
+        "tatordno": "Ordno (int)",
+        "tatownersite": "Contains the order's owner site define in oownersite (Site Code) (int)",
+        "tatperformsite": "request performing site (int)",
+        "tatreceipt": "reception time (int)",
+        "tatresult": "result time (int)",
+        "tatsender": "sender (int)",
+        "tatsetuptime": "culture setup time (int)",
+        "tatshipped": "The calculated number of minutes passed between the order's creation time and the test's shipping time (int)",
+        "tatsite": "Site Code (int)",
+        "tattest": "test code (int)",
+        "tattestnum": "testnum (smallint)",
+        "taturgent": "is urgent (tinyint)"
+    },
+    "joins": {},
+    "examples": [
+        {
+            "query": "SELECT COUNT(*) AS RET FROM tat(NOLOCK) WHERE tat.tatordno={order_number} AND tat.tatdate={tat_date}",
+            "description": "Count turn around time records for a specific order and date",
+            "parameters": {
+                "order_number": "Order number (e.g., 116081398)",
+                "tat_date": "TAT date in YYYYMMDD format (e.g., 20250820)"
+            }
+        },
+        {
+            "query": "SELECT * FROM tat(NOLOCK) WHERE tat.tatdate BETWEEN {start_date} AND {end_date} AND tat.tatlab={lab_code} ORDER BY tat.tatdate ASC, tat.tatordno ASC",
+            "description": "Retrieve turn around time records for a specific lab within a date range, ordered chronologically",
+            "parameters": {
+                "start_date": "Start date in YYYYMMDD format (e.g., 20240101)",
+                "end_date": "End date in YYYYMMDD format (e.g., 20241231)",
+                "lab_code": "Laboratory code (e.g., 1)"
+            }
+        },
+        {
+            "query": "SELECT * FROM tat(NOLOCK) WHERE tat.tattest={test_code} AND tat.tatdate={tat_date} AND tat.tatcount=1",
+            "description": "Retrieve counted turn around time records for a specific test and date",
+            "parameters": {
+                "test_code": "Test code (e.g., 30907231)",
+                "tat_date": "TAT date in YYYYMMDD format (e.g., 20250820)"
+            }
+        },
+        {
+            "query": "SELECT AVG(tat.tatresult) AS avg_result_time, AVG(tat.tatapprove) AS avg_approve_time FROM tat(NOLOCK) WHERE tat.tattest={test_code} AND tat.tatdate BETWEEN {start_date} AND {end_date} AND tat.tatcount=1",
+            "description": "Calculate average result and approval times for a specific test within a date range",
+            "parameters": {
+                "test_code": "Test code (e.g., 30907231)",
+                "start_date": "Start date in YYYYMMDD format (e.g., 20240101)",
+                "end_date": "End date in YYYYMMDD format (e.g., 20241231)"
+            }
+        },
+        {
+            "query": "SELECT * FROM tat(NOLOCK) WHERE tat.taturgent=1 AND tat.tatdate={tat_date} AND tat.tatsite={site_code} ORDER BY tat.tatresult DESC",
+            "description": "Retrieve urgent turn around time records for a specific date and site, ordered by result time descending",
+            "parameters": {
+                "tat_date": "TAT date in YYYYMMDD format (e.g., 20250820)",
+                "site_code": "Site code (e.g., 1)"
+            }
+        },
+        {
+            "query": "SELECT * FROM tat(NOLOCK) WHERE tat.tatsender={sender_code} AND tat.tatdate={tat_date} AND tat.tatperformsite={perform_site}",
+            "description": "Retrieve turn around time records by sender code for a specific date and performing site",
+            "parameters": {
+                "sender_code": "Sender code (e.g., 16526)",
+                "tat_date": "TAT date in YYYYMMDD format (e.g., 20250820)",
+                "perform_site": "Performing site code (e.g., 3)"
+            }
+        },
+        {
+            "query": "SELECT * FROM tat(NOLOCK) WHERE tat.tatinst={machine_code} AND tat.tatdate BETWEEN {start_date} AND {end_date} ORDER BY tat.tatentry ASC",
+            "description": "Retrieve turn around time records for a specific machine within a date range, ordered by entry time",
+            "parameters": {
+                "machine_code": "Machine code (e.g., 10221)",
+                "start_date": "Start date in YYYYMMDD format (e.g., 20240101)",
+                "end_date": "End date in YYYYMMDD format (e.g., 20241231)"
+            }
+        },
+        {
+            "query": "SELECT MAX(tat.tatresult) AS max_result_time, MIN(tat.tatresult) AS min_result_time FROM tat(NOLOCK) WHERE tat.tatlab={lab_code} AND tat.tatdate={tat_date} AND tat.tatcount=1",
+            "description": "Find maximum and minimum result times for a specific lab and date among counted records",
+            "parameters": {
+                "lab_code": "Laboratory code (e.g., 1)",
+                "tat_date": "TAT date in YYYYMMDD format (e.g., 20250820)"
+            }
+        }
+    ],
+    "Indexes": {
+        "INDEX0_UNQ_TAT": "clustered, unique located on PRIMARY (tatdate, tatordno, tattestnum)"
+    }
+}

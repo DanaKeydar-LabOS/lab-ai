@@ -1,0 +1,189 @@
+{
+    "table": "i",
+    "display_name": "Patients",
+    "alias": "i",
+    "description": "Patients",
+    "fields": {
+        "iacc": "Medical Record Number (nvarchar)",
+        "ibeeper": "Pager Number (int)",
+        "ibloodtype": "patient blood type (nvarchar)",
+        "icity": "City (int)",
+        "icityn": "city name (nvarchar)",
+        "icode": "Interal Code For Patient (int)",
+        "icountry": "Country (int)",
+        "icredit": "Is Eligible For Tests (tinyint)",
+        "idate": "Date Of Admission To Hospital (int)",
+        "idateofdeath": "Date Of Death (int)",
+        "idept": "Department Code (int)",
+        "idob": "Date Of Birth (int)",
+        "idoccode": "Doctor Code (int)",
+        "iebeeper": "Employee Beeper Number (int)",
+        "iecity": "Employment City Code (int)",
+        "iecityn": "Employment City Name (nvarchar)",
+        "iecountry": "Employment Country Code (int)",
+        "ieemail": "Employment EMail (nvarchar)",
+        "iefax": "Employment Fax Number (nvarchar)",
+        "iefirstname": "Employment First Name (nvarchar)",
+        "ieid": "employer's ID (nvarchar)",
+        "ielastname": "Employment Last Name (nvarchar)",
+        "iemail": "Email Address (nvarchar)",
+        "iemobile": "Employment Mobile Phone Number (nvarchar)",
+        "iemploydate": "Employment Date (int)",
+        "iephone": "Employment Phone Number (nvarchar)",
+        "iephoneext": "Employment Phone Extension (smallint)",
+        "iestate": "Employment State (int)",
+        "iestr1": "Employment Address1 (nvarchar)",
+        "iestr2": "Employment Address2 (nvarchar)",
+        "iestr3": "Employment Address3 (nvarchar)",
+        "iewphone1": "employer's work phone number (nvarchar)",
+        "iezip": "Employment Zip Code (nvarchar)",
+        "ifasrce1": "Origin Of Father 1 (smallint)",
+        "ifasrce2": "Origin Of Father 2 (smallint)",
+        "ifather": "Father Name (nvarchar)",
+        "ifax": "Fax Number (nvarchar)",
+        "ifirst": "First Name (nvarchar)",
+        "iheight": "Height (smallint)",
+        "ihiv": "Is Patient Known For HIV (tinyint)",
+        "ihpb": "Is Patient Known For HPB (tinyint)",
+        "iid": "patient id (nvarchar)",
+        "iidtype": "Patient Id Type (tinyint)",
+        "iisdead": "Is Already Dead (tinyint)",
+        "ilast": "Last Name (nvarchar)",
+        "imid": "patient middle name (nvarchar)",
+        "imobile": "Mobile Phone Number (nvarchar)",
+        "imosrce1": "Origin Of Mother 1 (smallint)",
+        "imosrce2": "Origin Of Mother 2 (smallint)",
+        "inocharge": "orders of these patients will not bill patient, will put billing order on hold. (tinyint)",
+        "iorigland": "Country Of Origin (smallint)",
+        "iotherid1": "Additional Id Number (nvarchar)",
+        "iotherid2": "Additional Id Number (nvarchar)",
+        "ipersonal": "Is Personnel (tinyint)",
+        "iphone": "Phone Number (nvarchar)",
+        "iphoneext": "Extension Number (smallint)",
+        "ipopultype": "Ethnic Group (smallint)",
+        "iprofession": "Profession (smallint)",
+        "iref": "No Documentation for this Field (nvarchar)",
+        "iroom": "Room Number (nvarchar)",
+        "iscity": "Shipment address city code (int)",
+        "iscityn": "Shipment address city name (nvarchar)",
+        "iscountry": "Shipment address country code (int)",
+        "iselfpay": "if patient is billed for the orders (not insurance) (tinyint)",
+        "isex": "Patient Sex (smallint)",
+        "ismobile": "Shipment address mobile number (nvarchar)",
+        "isndcode": "Sender Code (int)",
+        "isphone": "Shipment address phone number (nvarchar)",
+        "isrce": "Source Of Record (tinyint)",
+        "isstate": "Shipment address state code (int)",
+        "isstr1": "Shipment address street1 (nvarchar)",
+        "isstr2": "Shipment address street2 (nvarchar)",
+        "istate": "State (int)",
+        "istatus": "Patient Status After Centeral Demographic Loading (EXE For Clalit) (smallint)",
+        "istr1": "Address1 (nvarchar)",
+        "istr2": "Address2 (nvarchar)",
+        "istr3": "Address3 (nvarchar)",
+        "istudycode": "No Documentation for this Field (int)",
+        "iszip": "Shipment address zip code (nvarchar)",
+        "itype": "Patient Type (For Researchs) (tinyint)",
+        "itz": "Patient Id (nvarchar)",
+        "iviewresultdist": "Whether to add Patient View distribution (tinyint)",
+        "ivip": "sing that patient is vip (tinyint)",
+        "iweight": "Weight (real)",
+        "iwphone1": "Work Phone (nvarchar)",
+        "izip": "Zip Code (nvarchar)",
+        "lastupdate": "last setup update (int)"
+    },
+    "joins": {
+        "o": [
+            "i.idob = o.odob",
+            "i.itz = o.otz"
+        ],
+        "aep": "i.icode = aep.eppatcode",
+        "ao": [
+            "i.itz = ao.aotz",
+            "i.icode = ao.aopatcode"
+        ],
+        "asa": "i.icode = asa.asapatcode",
+        "ep": "i.icode = ep.eppatcode"
+    },
+    "examples": [
+        {
+            "query": "SELECT * FROM i(NOLOCK) WHERE i.icode={patient_code}",
+            "description": "Retrieve patient information by internal patient code",
+            "parameters": {
+                "patient_code": "Internal patient code (e.g., 2302185)"
+            }
+        },
+        {
+            "query": "SELECT * FROM po(NOLOCK) join i(NOLOCK) on popatcode=icode WHERE (po.poordname={order_name} OR po.poordname like {order_name_pattern} OR po.poordno={order_number}) AND po.potype<>{excluded_type} AND po.podate<={max_date} AND po.posite={site_code} ORDER BY po.podate DESC,po.potime DESC,po.poordno DESC",
+            "description": "Retrieve patient orders by order name/number with patient information, excluding specific order types and filtering by site and date",
+            "parameters": {
+                "order_name": "Order name (e.g., N'NL116113517')",
+                "order_name_pattern": "Order name pattern for LIKE search (e.g., N'NL116113517-%')",
+                "order_number": "Order number (e.g., 116113517)",
+                "excluded_type": "Order type to exclude (e.g., 2)",
+                "max_date": "Maximum order date in YYYYMMDD format (e.g., 20250822)",
+                "site_code": "Site code (e.g., 1)"
+            }
+        },
+        {
+            "query": "SELECT * FROM r(NOLOCK) join o(NOLOCK) on r.rdate=o.odate AND r.rordno=o.oordno join sa(NOLOCK) on r.rdate=sa.sadate AND r.rordno=sa.saordno AND r.rtubenum=sa.satubenum join i(NOLOCK) on o.opatcode=i.icode WHERE sa.sanotreceived=0 AND o.odate={order_date} AND o.oordno={order_number} AND r.rtubenum={tube_number} AND sa.satype={sample_type} AND o.osite={site_code} AND o.otype<>{excluded_type} ORDER BY r.rdate ASC,sa.saformattedlabel ASC,r.rordno ASC,r.rtubenum ASC,r.rsort ASC,r.rtest ASC,r.rinsertdate ASC,r.rinserttime ASC,r.rtestnum ASC",
+            "description": "Complex multi-table join retrieving test results with orders, samples, and patient information, with comprehensive filtering and ordering",
+            "parameters": {
+                "order_date": "Order date in YYYYMMDD format (e.g., 20250815)",
+                "order_number": "Order number (e.g., 115951217)",
+                "tube_number": "Tube number (e.g., 9)",
+                "sample_type": "Sample type (e.g., 0)",
+                "site_code": "Site code (e.g., 1)",
+                "excluded_type": "Order type to exclude (e.g., 2)"
+            }
+        },
+        {
+            "query": "SELECT i.* FROM i(NOLOCK) join ii(NOLOCK) on i.icode=ii.iicode WHERE EXISTS (SELECT * FROM dp(NOLOCK) WHERE i.icode=dp.dppatcode AND dp.dptype={demographics_type} AND dp.dpcode={demographics_code}) AND i.iisdead=0 AND i.ifirst like {first_name_pattern} AND i.idob={date_of_birth} AND (i.ivip is null OR i.ivip=0) AND (i.ilast like {search_pattern} OR i.ifirst like {search_pattern} OR i.iphone like {search_pattern} OR i.istr1 like {search_pattern} OR i.istr2 like {search_pattern} OR i.izip like {search_pattern}) ORDER BY i.ilast ASC,i.ifirst ASC,i.icode ASC,ii.iipid ASC",
+            "description": "Advanced patient search with demographics validation, VIP filtering, and multi-field pattern matching",
+            "parameters": {
+                "demographics_type": "Demographics type (e.g., 8)",
+                "demographics_code": "Demographics code (e.g., 22507)",
+                "first_name_pattern": "First name pattern (e.g., N'J%')",
+                "date_of_birth": "Date of birth in YYYYMMDD format (e.g., 19870809)",
+                "search_pattern": "Search pattern for multiple fields (e.g., N'KELLY%')"
+            }
+        },
+        {
+            "query": "SELECT * FROM po(NOLOCK) join i(NOLOCK) on popatcode=icode WHERE EXISTS (SELECT * FROM psa(NOLOCK) WHERE po.poordno=psa.psaordno AND po.podate=psa.psadate AND psa.psaformattedlabel={formatted_label}) AND po.potype<>{excluded_type} AND po.podate<={max_date} AND po.posite={site_code} ORDER BY po.podate DESC,po.potime DESC,po.poordno DESC",
+            "description": "Retrieve patient orders with sample label validation through EXISTS subquery, filtered by order type, date, and site",
+            "parameters": {
+                "formatted_label": "Formatted sample label (e.g., N'NL116113522')",
+                "excluded_type": "Order type to exclude (e.g., 2)",
+                "max_date": "Maximum order date in YYYYMMDD format (e.g., 20250822)",
+                "site_code": "Site code (e.g., 1)"
+            }
+        },
+        {
+            "query": "SELECT * FROM i(NOLOCK) WHERE i.ilast like {last_name_pattern} AND i.ifirst like {first_name_pattern} AND i.idob BETWEEN {start_dob} AND {end_dob} ORDER BY i.ilast ASC, i.ifirst ASC",
+            "description": "Search patients by name patterns and date of birth range, ordered alphabetically",
+            "parameters": {
+                "last_name_pattern": "Last name pattern (e.g., N'SMITH%')",
+                "first_name_pattern": "First name pattern (e.g., N'JOHN%')",
+                "start_dob": "Start date of birth in YYYYMMDD format (e.g., 19800101)",
+                "end_dob": "End date of birth in YYYYMMDD format (e.g., 19891231)"
+            }
+        },
+        {
+            "query": "SELECT * FROM i(NOLOCK) WHERE i.iacc={medical_record} OR i.iotherid1={id1} OR i.iotherid2={id2}",
+            "description": "Retrieve patient by medical record number or additional ID numbers",
+            "parameters": {
+                "medical_record": "Medical record number (e.g., 'MRN123456')",
+                "id1": "Additional ID 1 (e.g., 'ID001')",
+                "id2": "Additional ID 2 (e.g., 'ID002')"
+            }
+        }
+    ],
+    "Indexes": {
+        "INDEX0_UNQ_I": "nonclustered, unique located on PRIMARY (icode)",
+        "INDEX1_I": "nonclustered located on PRIMARY (ilast, ifirst, iphone, iacc, iotherid1, iotherid2, iisdead, istr1, izip, isndcode, icode, idob, icityn, istate, imid, isex)",
+        "INDEX2_I": "nonclustered located on PRIMARY (iid, ilast, ifirst, iphone, iacc, iotherid1, iotherid2, iisdead, istr1, izip, icode, idob, icityn, istate, isndcode, isex)",
+        "INDEX3_I": "nonclustered located on PRIMARY (ifirst)",
+        "INDEX4_I": "nonclustered located on PRIMARY (iacc)",
+        "INDEX5_I": "nonclustered located on PRIMARY (iref)"
+    }
+}

@@ -1,0 +1,75 @@
+{
+    "table": "aep",
+    "display_name": "Archived Episodes",
+    "alias": "aep",
+    "description": "Episodes in Archive",
+    "fields": {
+        "epclosedate": "Episode Closing Date (int)",
+        "epclosetime": "Episode Closing Time (smallint)",
+        "epcode": "Episode Number (external) (nvarchar)",
+        "epcommconst": "Count Of Const Comments For The Episode (smallint)",
+        "epcommfree": "Count Of Free Comments For The Episode (smallint)",
+        "epdate": "Episode Opening Date (int)",
+        "epextfield1": "No Documentation for this Field (int)",
+        "epextfield2": "No Documentation for this Field (int)",
+        "epextfield3": "No Documentation for this Field (int)",
+        "epid": "Patient Id If The Episode Related To Patient (nvarchar)",
+        "epnumber": "Episode Number (Internal For The System) (int)",
+        "eppatcode": "Patient Code (int)",
+        "epsite": "No Documentation for this Field (int)",
+        "eptime": "Episode Opening Time (smallint)",
+        "eptype": "Episode Type (smallint)"
+    },
+    "joins": {
+        "ao": "aep.epnumber = ao.aoordno",
+        "i": "aep.eppatcode = i.icode"
+    },
+    "examples": [
+        {
+            "query": "SELECT * FROM aep(NOLOCK) join aepc(NOLOCK) on aep.epcode=aepc.epccode AND aep.eptype=aepc.epctype WHERE aepc.epcdate={date} AND aepc.epcorder={order_id} AND aep.eptype<>12 AND aep.eptype<>13",
+            "description": "Join archived episodes with episode collection table to retrieve episodes by date and order ID, filtering out specific episode types",
+            "parameters": {
+                "date": "Episode date in YYYYMMDD format (e.g., 20250820)",
+                "order_id": "Episode order number (e.g., 116111720)"
+            }
+        },
+        {
+            "query": "SELECT * FROM aep(NOLOCK) WHERE aep.eptype<>12 AND EXISTS (SELECT * FROM aepc(NOLOCK) WHERE aep.eptype=aepc.epctype AND aep.epcode=aepc.epccode AND aepc.epcdate={date} AND aepc.epcorder={order_id}) ORDER BY aep.epdate ASC,aep.eptime ASC",
+            "description": "Retrieve archived episodes that match criteria in episode collection table, excluding specific episode type and ordered chronologically",
+            "parameters": {
+                "date": "Episode date in YYYYMMDD format (e.g., 20241204)",
+                "order_id": "Episode order number (e.g., 107467168)"
+            }
+        },
+        {
+            "query": "SELECT * FROM aep(NOLOCK) WHERE aep.eptype<>{excluded_type} AND EXISTS (SELECT * FROM aepc(NOLOCK) WHERE aep.eptype=aepc.epctype AND aep.epcode=aepc.epccode AND aepc.epcdate={date} AND aepc.epcorder={order_id}) ORDER BY aep.epdate ASC,aep.eptime ASC",
+            "description": "Get archived episodes matching collection criteria while excluding specified episode type, results sorted by date and time",
+            "parameters": {
+                "excluded_type": "Episode type to exclude (e.g., 12)",
+                "date": "Episode date in YYYYMMDD format (e.g., 20250609)",
+                "order_id": "Episode order number (e.g., 113745049)"
+            }
+        },
+        {
+            "query": "SELECT * FROM aep(NOLOCK) WHERE eptype BETWEEN {start_type} AND {end_type}",
+            "description": "Retrieve archived episodes within a specified range of episode types",
+            "parameters": {
+                "start_type": "Starting episode type (e.g., 1)",
+                "end_type": "Ending episode type (e.g., 10)"
+            }
+        },
+        {
+            "query": "SELECT * FROM aep(NOLOCK) WHERE eppatcode={patient_code} AND epdate BETWEEN {start_date} AND {end_date} ORDER BY epdate ASC, eptime ASC",
+            "description": "Query patient-specific archived episodes within a date range, ordered chronologically by opening date and time",
+            "parameters": {
+                "patient_code": "Patient code (e.g., 12345)",
+                "start_date": "Start date in YYYYMMDD format (e.g., 20240101)",
+                "end_date": "End date in YYYYMMDD format (e.g., 20241231)"
+            }
+        }
+    ],
+    "Indexes": {
+        "INDEX0_UNQ_AEP": "nonclustered, unique located on PRIMARY (eptype, epcode)",
+        "INDEX1_AEP": "nonclustered located on PRIMARY (eppatcode, eptype, epnumber)"
+    }
+}

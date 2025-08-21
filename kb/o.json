@@ -1,0 +1,153 @@
+{
+    "table": "o",
+    "display_name": "Orders",
+    "alias": "o",
+    "description": "Orders In Current",
+    "fields": {
+        "oalert": "Is there alert linked to the order in the alert window (tinyint)",
+        "obilling": "Not Active (tinyint)",
+        "ocolldate": "Order collection date (int)",
+        "ocolltime": "Order collection time (smallint)",
+        "ocommnconst": "Count of const comment for order (smallint)",
+        "ocommnfree": "Count of free comment for order (smallint)",
+        "odate": "Order date (int)",
+        "odatexec1": "Order approve date (int)",
+        "odatexec2": "The date in which all the tests in the requisition were distributed (int)",
+        "odaystomove": "Number of days for staying in the running file )Before moving to Archive) (smallint)",
+        "odblentry": "Double entry is required (smallint)",
+        "odelay": "Is the order delayed ? (tinyint)",
+        "odob": "Date of birth for patient (int)",
+        "odoctors": "Option to add another doctors for the order (with \"|\" between the codes. rellevant only for blood bank) (nvarchar)",
+        "ofasthigh": "The Count of tests with short distribution time that were approved (tinyint)",
+        "ofastlow": "The Count of tests with short distribution time that are still in process (tinyint)",
+        "ofastmidhigh": "The Count of tests with medium distribution time that were approved (tinyint)",
+        "ofastmidlow": "The Count of tests with medium distribution time that are still in process (tinyint)",
+        "oflag": "user flag - ttype = 104 (smallint)",
+        "oinschedule": "Belong to Pre schedule (tinyint)",
+        "olab": "Order lab code (smallint)",
+        "olicens": "Doctor code (int)",
+        "omaxtestnum": "Maximun number of tests in the requisition (smallint)",
+        "oordname": "Order number (External) (nvarchar)",
+        "oordno": "Order number (Internal) (int)",
+        "oorigsender": "Original facility from reference lab - the reference lab is in main order facility (int)",
+        "oownersite": "The owner site of the order (int)",
+        "opatcode": "Patient code (int)",
+        "opreferred": "No longer relevant in 2.43 (tinyint)",
+        "oreference": "Unique Identifier for the Order (mask: orderNum@Site Code|Req. date|Req. time) (nvarchar)",
+        "orepetition": "Not Active (int)",
+        "oresultreport": "DELETED (tinyint)",
+        "osex": "Sex of patient (smallint)",
+        "osite": "order parent site (int)",
+        "oslowhigh": "No Documentation for this Field (tinyint)",
+        "oslowlow": "No Documentation for this Field (tinyint)",
+        "osndcod": "Facility code (int)",
+        "osource": "Not Active (tinyint)",
+        "ostatfh": "Count of tests in status 1700 and above (smallint)",
+        "ostatfl": "Count of tests in status below 1700 (smallint)",
+        "ostatus": "Requisition status (pathology) (smallint)",
+        "osuspect": "Is the patient suspect for HIV ? (smallint)",
+        "otime": "Order time (smallint)",
+        "otimexec1": "Order approve time (smallint)",
+        "otimexec2": "The time in which all the tests in the requisition were distributed (smallint)",
+        "otype": "Order type (tinyint)",
+        "otz": "Patient ID (nvarchar)",
+        "oucod": "The user who opened the order (smallint)",
+        "ourgent": "Is the requisition urgent ? (tinyint)"
+    },
+    "joins": {
+        "i": [
+            "o.odob = i.idob",
+            "o.otz = i.itz"
+        ]
+    },
+    "examples": [
+        {
+            "query": "SELECT * FROM o(NOLOCK) WHERE o.odate={order_date} AND o.oordno={order_number}",
+            "description": "Retrieve specific order by date and internal order number",
+            "parameters": {
+                "order_date": "Order date in YYYYMMDD format (e.g., 20250819)",
+                "order_number": "Internal order number (e.g., 116060693)"
+            }
+        },
+        {
+            "query": "SELECT r.* FROM r(NOLOCK) join sa(NOLOCK) on r.rdate=sa.sadate AND r.rordno=sa.saordno AND r.rtubenum=sa.satubenum join o(NOLOCK) on r.rdate=o.odate AND r.rordno=o.oordno WHERE sa.sanotreceived=0 AND r.risprofile=0 AND o.osite={site_code} AND o.otype<>{excluded_type} AND r.rdate={result_date} AND r.rordno={order_number} AND r.rtubenum={tube_number} ORDER BY r.rdate ASC,sa.saformattedlabel ASC,r.rordno ASC,r.rtubenum ASC",
+            "description": "Retrieve test results joined with samples and orders, filtering by site, order type, and specific order details",
+            "parameters": {
+                "site_code": "Site code (e.g., 1)",
+                "excluded_type": "Order type to exclude (e.g., 2)",
+                "result_date": "Result date in YYYYMMDD format (e.g., 20250820)",
+                "order_number": "Internal order number (e.g., 114619775)",
+                "tube_number": "Tube number (e.g., 1)"
+            }
+        },
+        {
+            "query": "SELECT * FROM o(NOLOCK) join r(NOLOCK) on rordno=oordno AND rdate=odate WHERE (o.odate<={cutoff_date} OR (o.odate={target_date} AND o.otime<={cutoff_time})) AND NOT (o.oordno={excluded_order} AND o.odate={excluded_date}) AND r.rtest={test_code} AND o.opatcode={patient_code} AND o.odate<={max_date} AND o.otype<>{excluded_type} AND r.rdynamictime=0 ORDER BY o.odate DESC",
+            "description": "Retrieve orders with test results using complex date/time filtering, excluding specific orders and order types",
+            "parameters": {
+                "cutoff_date": "Cutoff date in YYYYMMDD format (e.g., 20250820)",
+                "target_date": "Target date for time comparison (e.g., 20250821)",
+                "cutoff_time": "Cutoff time in HHMM format (e.g., 29)",
+                "excluded_order": "Order number to exclude (e.g., 116082477)",
+                "excluded_date": "Date of excluded order (e.g., 20250821)",
+                "test_code": "Test code to filter by (e.g., 30907231)",
+                "patient_code": "Patient code (e.g., 68521820)",
+                "max_date": "Maximum order date (e.g., 20250821)",
+                "excluded_type": "Order type to exclude (e.g., 2)"
+            }
+        },
+        {
+            "query": "SELECT * FROM o(NOLOCK) WHERE o.opatcode={patient_code} AND o.odate BETWEEN {start_date} AND {end_date} ORDER BY o.odate DESC, o.otime DESC",
+            "description": "Retrieve patient orders within a date range, ordered by most recent first",
+            "parameters": {
+                "patient_code": "Patient code (e.g., 68521820)",
+                "start_date": "Start date in YYYYMMDD format (e.g., 20240101)",
+                "end_date": "End date in YYYYMMDD format (e.g., 20241231)"
+            }
+        },
+        {
+            "query": "SELECT * FROM o(NOLOCK) WHERE o.osndcod={sender_code} AND o.odate={order_date} AND o.otype<>{excluded_type}",
+            "description": "Retrieve orders by facility/sender code for a specific date, excluding certain order types",
+            "parameters": {
+                "sender_code": "Facility/sender code (e.g., 16526)",
+                "order_date": "Order date in YYYYMMDD format (e.g., 20250820)",
+                "excluded_type": "Order type to exclude (e.g., 2)"
+            }
+        },
+        {
+            "query": "SELECT * FROM o(NOLOCK) WHERE o.olicens={doctor_code} AND o.odate BETWEEN {start_date} AND {end_date} ORDER BY o.odate ASC",
+            "description": "Retrieve orders by doctor code within a date range, ordered chronologically",
+            "parameters": {
+                "doctor_code": "Doctor code (e.g., 1450629)",
+                "start_date": "Start date in YYYYMMDD format (e.g., 20250801)",
+                "end_date": "End date in YYYYMMDD format (e.g., 20250831)"
+            }
+        },
+        {
+            "query": "SELECT * FROM o(NOLOCK) WHERE o.ourgent=1 AND o.odate={order_date} AND o.osite={site_code}",
+            "description": "Retrieve urgent orders for a specific date and site",
+            "parameters": {
+                "order_date": "Order date in YYYYMMDD format (e.g., 20250820)",
+                "site_code": "Site code (e.g., 1)"
+            }
+        },
+        {
+            "query": "SELECT * FROM o(NOLOCK) WHERE o.ostatus BETWEEN {min_status} AND {max_status} AND o.olab={lab_code} ORDER BY o.odate DESC",
+            "description": "Retrieve orders within a status range for a specific laboratory, ordered by most recent first",
+            "parameters": {
+                "min_status": "Minimum status (e.g., 1000)",
+                "max_status": "Maximum status (e.g., 1999)",
+                "lab_code": "Laboratory code (e.g., 24)"
+            }
+        }
+    ],
+    "Indexes": {
+        "INDEX0_UNQ_O": "clustered, unique located on PRIMARY (oordno, odate)",
+        "INDEX1_O": "nonclustered located on PRIMARY (opatcode, odate, oordno)",
+        "INDEX2_O": "nonclustered located on PRIMARY (osndcod)",
+        "INDEX3_O": "nonclustered located on PRIMARY (olicens)",
+        "INDEX4_O": "nonclustered located on PRIMARY (oordname, odate)",
+        "INDEX5_O": "nonclustered located on PRIMARY (oreference)",
+        "INDEX6_O": "nonclustered located on PRIMARY (odate, oordno)",
+        "INDEX7_O": "nonclustered located on PRIMARY (odate, oordno, olab, opatcode)"
+    }
+}
